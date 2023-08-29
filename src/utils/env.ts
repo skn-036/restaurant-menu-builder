@@ -1,8 +1,10 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
+type Environment = 'development' | 'production';
+
 interface Env {
-    ENVIRONMENT: string;
+    ENVIRONMENT: Environment;
     CLIENT_URL: string;
     SERVER_URL: string;
     PORT: string | number;
@@ -10,7 +12,7 @@ interface Env {
 }
 
 const env: Env = {
-    ENVIRONMENT: process.env.ENVIRONMENT || 'development',
+    ENVIRONMENT: (process.env.ENVIRONMENT as Environment) || 'development',
     CLIENT_URL: process.env.APP_URL || 'localhost:5000',
     SERVER_URL: process.env.CLIENT_APP_URL || 'localhost:5173',
     PORT: process.env.PORT || 5000,
