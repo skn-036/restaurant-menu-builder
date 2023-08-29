@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import { removeLastChar } from '@/helpers/common';
 import env from '@/utils/env';
 import { CorsOptions } from 'cors';
 
@@ -7,8 +8,23 @@ export const setResponseHeaders = (
     res: Response,
     next: NextFunction
 ) => {
-    res.setHeader('Access-Control-Allow-Credentials', 'true');
-    res.setHeader('Access-Control-Allow-Origin', 'true');
+    if (env.ENVIRONMENT === 'development') {
+        res.setHeader('Access-Control-Allow-Credentials', 'true');
+        res.setHeader('Access-Control-Allow-Origin', 'true');
+        next();
+    } else {
+        const referrer = removeLastChar(req.headers.referer, '/');
+        if (!referrer || !env.ALLOWED_ORIGINS.includes(referrer)) {
+            res.status(404);
+            return;
+        }
+        res.setHeader('Access-Control-Allow-Credentials', 'true');
+        res.setHeader('Access-Control-Allow-Origin', 'true');
+        next();
+    }
+    // console.log(removeLastChar(req.headers.referer, '/'));
+    // res.setHeader('Access-Control-Allow-Credentials', 'true');
+    // res.setHeader('Access-Control-Allow-Origin', 'true');
 
     // let requestOrigins = req.headers['origin']
     //     ? req.headers['origin']
@@ -24,7 +40,7 @@ export const setResponseHeaders = (
     //     res.setHeader('Access-Control-Allow-Credentials', 'true');
     //     res.setHeader('Access-Control-Allow-Origin', 'true');
     // }
-    next();
+    // next();
 };
 
 export const corsOptions: CorsOptions = {
