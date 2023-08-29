@@ -15,37 +15,22 @@ export const setResponseHeaders = (
     } else {
         const referrer = removeLastChar(req.headers.referer, '/');
         if (!referrer || !env.ALLOWED_ORIGINS.includes(referrer)) {
-            res.status(404);
+            res.status(404).send();
             return;
         }
         res.setHeader('Access-Control-Allow-Credentials', 'true');
         res.setHeader('Access-Control-Allow-Origin', 'true');
         next();
     }
-    // console.log(removeLastChar(req.headers.referer, '/'));
-    // res.setHeader('Access-Control-Allow-Credentials', 'true');
-    // res.setHeader('Access-Control-Allow-Origin', 'true');
-
-    // let requestOrigins = req.headers['origin']
-    //     ? req.headers['origin']
-    //     : req.headers['Origin']
-    //     ? req.headers['Origin']
-    //     : [];
-
-    // if (typeof requestOrigins === 'string') requestOrigins = [requestOrigins];
-
-    // if (!requestOrigins) return next();
-
-    // if (requestOrigins.some(origin => env.ALLOWED_ORIGINS.includes(origin))) {
-    //     res.setHeader('Access-Control-Allow-Credentials', 'true');
-    //     res.setHeader('Access-Control-Allow-Origin', 'true');
-    // }
-    // next();
 };
 
 export const corsOptions: CorsOptions = {
-    origin: (requestOrigin, callback) => {
-        return callback(null, true);
+    origin: (_, callback) => {
+        if (env.ENVIRONMENT === 'development') return callback(null, true);
+        else {
+            return callback(null, env.ALLOWED_ORIGINS);
+        }
+        // return callback(null, true);
         // if (env.ENVIRONMENT === 'development' && !requestOrigin) {
         //     callback(null, true);
         // } else if (!requestOrigin) {
