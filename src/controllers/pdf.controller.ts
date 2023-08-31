@@ -5,6 +5,8 @@ import pdf2img from 'pdf-img-convert';
 import fs from 'fs';
 
 import { launchPuppeteer, closePuppeteer } from '@/utils/puppeteer';
+import { createDirectory } from '@/helpers/file';
+import { resolveTemplateString } from '@/composables/resolve-template';
 
 import { TemplateInformation } from '@/types/pdf';
 
@@ -31,17 +33,16 @@ export const onPdfPreview = async (req: Request, res: Response) => {
             scale: 1.8,
         });
 
+        const directory = path.join(__dirname, '../public/pdf/temp');
+        createDirectory(directory, false);
+
         let filePaths: string[] = [];
         for (let i = 0; i < pdfArray.length; i++) {
-            fs.writeFile(
-                path.join(__dirname, `../public/pdf/temp/output-${i}.png`),
-                pdfArray[i],
-                error => {
-                    if (error) {
-                        console.error('Error: ' + error);
-                    }
+            fs.writeFile(`${directory}/output-${i}.png`, pdfArray[i], error => {
+                if (error) {
+                    console.error('Error: ' + error);
                 }
-            );
+            });
             filePaths = filePaths.concat(`/pdf/temp/output-${i}.png`);
         }
 
@@ -53,10 +54,11 @@ export const onPdfPreview = async (req: Request, res: Response) => {
 
 export const generatePdf = async (req: Request, filePath: string = '') => {
     try {
-        const { body, templateInformation } = req.body as {
-            body: string;
+        const { templateInformation } = req.body as {
             templateInformation: TemplateInformation;
         };
+
+        const body = resolveTemplateString(templateInformation);
 
         const browser = await launchPuppeteer();
         const page = await browser.newPage();
@@ -78,21 +80,32 @@ export const generatePdf = async (req: Request, filePath: string = '') => {
             `,
         });
 
+        const pdfFilePath = filePath
+            ? filePath
+            : path.resolve(__dirname, '../public/pdf/output.pdf');
+
+        createDirectory(pdfFilePath);
+
+        const marginValue =
+            templateInformation.pageSize.size === 'A4' ? 72 : 48;
+
+        // 96dpi / 72dpi = 1.33, A5 / A4 = 0.705
+        const scale =
+            templateInformation.pageSize.size === 'A4' ? 1.33 : 1.33 * 0.705;
+
         const options: PDFOptions = {
-            format: 'A4',
+            format: templateInformation.pageSize.size,
             printBackground: false,
             displayHeaderFooter: true,
             headerTemplate: header,
-            path: filePath
-                ? filePath
-                : path.resolve(__dirname, '../public/pdf/output.pdf'),
+            path: pdfFilePath,
             margin: {
-                top: 72,
-                bottom: 72,
-                left: 72,
-                right: 72,
+                top: marginValue,
+                bottom: marginValue,
+                left: marginValue,
+                right: marginValue,
             },
-            scale: 1.33,
+            scale,
         };
 
         const pdf = await page.pdf(options);

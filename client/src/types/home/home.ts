@@ -5,6 +5,7 @@ export type Template = {
     container: string;
     restaurant: string;
     product: string;
+    mapper: { key: string; A4: string; A5: string }[];
     demo_content?: string | null;
 };
 

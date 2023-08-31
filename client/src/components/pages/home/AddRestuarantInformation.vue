@@ -36,36 +36,21 @@ const { templateInformation, onUpdateTemplateInformation } = inject(
 
 const { templates } = inject(templateProviderKey) as TemplateProvider;
 
-const formData = ref<
-    Pick<
-        TemplateInformation,
-        'pageSize' | 'restaurant_information' | 'template'
-    >
->({
-    pageSize: { ...templateInformation.value.pageSize },
+const formData = ref<Pick<TemplateInformation, 'restaurant_information'>>({
     restaurant_information: {
         ...templateInformation.value.restaurant_information,
     },
-    template: { ...templateInformation.value.template },
 });
 const formErrors = ref<YupValidationError>({});
 watchEffect(() => {
     formData.value = {
-        pageSize: { ...templateInformation.value.pageSize },
         restaurant_information: {
             ...templateInformation.value.restaurant_information,
         },
-        template: { ...templateInformation.value.template },
     };
 });
 
 const schema = yupObject().shape({
-    pageSize: yupObject().shape({
-        size: yupString().nullable().required('Seitengröße ist erforderlich'),
-    }),
-    template: yupObject().shape({
-        id: yupString().nullable().required('Vorlage ist erforderlich'),
-    }),
     restaurant_information: yupObject().shape({
         name: yupString().nullable().required('Name ist erforderlich'),
         description: yupString()
@@ -80,7 +65,7 @@ const onSubmit = async () => {
         schema,
         formData.value
     );
-    console.log(errors);
+
     if (!validated) {
         formErrors.value = errors ? errors : {};
         return;
@@ -101,7 +86,7 @@ const onSubmit = async () => {
             <Title>Allgemeine Informationen</Title>
 
             <FormSelect
-                v-model="formData.template"
+                v-model="templateInformation.template"
                 :options="templates"
                 label="name"
                 select-label="Speisekarten Stil Pinsa"
@@ -113,7 +98,7 @@ const onSubmit = async () => {
             ></FormSelect>
 
             <FormSelect
-                v-model="formData.pageSize"
+                v-model="templateInformation.pageSize"
                 :options="pageSizes"
                 label="size"
                 select-label="Papier größe"
