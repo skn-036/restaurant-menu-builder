@@ -34,7 +34,7 @@ import defaultTemplates from '@/data/templates';
 
 // @ts-ignore
 const { windowWidth } = inject(appConfigProviderKey) as AppConfig;
-const { pageSizes, resolveTemplateString } = useTemplate();
+const { pageSizes } = useTemplate();
 const { save: generatePreview, saving: previewLoading } =
     useHttpRequest('api/pdf/preview');
 const { env } = useEnv();
@@ -56,8 +56,6 @@ const templateInformation = ref<TemplateInformation>({
     products: [],
 });
 
-const resolvedTemplateString = ref<string>('');
-
 const onUpdateTemplateInformation = (
     updatedTemplateInformation: TemplateInformation
 ) => {
@@ -67,17 +65,9 @@ const onUpdateTemplateInformation = (
 watch(
     () => cloneDeep(templateInformation.value),
     async () => {
-        resolvedTemplateString.value = resolveTemplateString(
-            templateInformation.value
-        );
+        console.log(templateInformation.value);
         const response = await generatePreview<string[]>({
-            body: resolvedTemplateString.value,
-            templateInformation: {
-                ...templateInformation.value,
-                products: [templateInformation.value.products]
-                    .concat(products.value)
-                    .concat(products.value),
-            },
+            templateInformation: templateInformation.value,
         });
         previewPages.value = response?.length ? response : [];
 
@@ -133,6 +123,31 @@ const onUpdateProduct = (product: Product) => {
 
 /**
  * -----------------------------------------------------------------------------
+ * print dialog ...
+ * -----------------------------------------------------------------------------
+ */
+const openPrintDialog = async () => {
+    const printWindow = window.open(
+        `${env.SERVER_URL}/static/pdf/output.pdf`,
+        '_blank'
+    );
+
+    // Check if the new window has been blocked
+    if (printWindow === null) {
+        return;
+    }
+
+    printWindow.onload = async () => {
+        await new Promise(resolve => {
+            printWindow.addEventListener('load', resolve);
+        });
+
+        printWindow.print();
+    };
+};
+
+/**
+ * -----------------------------------------------------------------------------
  * pdf generation...
  * -----------------------------------------------------------------------------
  */
@@ -162,12 +177,15 @@ provide(templateProviderKey, { templates });
 
 <template>
     <div class="w-full">
-        <div
+        <!-- loading -->
+        <section
             v-if="previewLoading"
             class="fixed top-24 left-1/2 z-20 px-4 py-2 bg-gradient text-white text-sm font-semibold rounded-md"
         >
             Vorschau wird geladen...
-        </div>
+        </section>
+
+        <!-- top section -->
         <section class="w-full py-8 border-b border-[#d9d9d9]">
             <div class="flex-between mb-2">
                 <div>
@@ -208,7 +226,7 @@ provide(templateProviderKey, { templates });
                         </Button>
                     </a>
 
-                    <Button label="Drucken">
+                    <Button label="Drucken" @click="openPrintDialog">
                         <template #icon>
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
@@ -230,8 +248,7 @@ provide(templateProviderKey, { templates });
             </div>
         </section>
 
-        <!-- <img src="http://127.0.0.1:5000/images/bg-menu.png" /> -->
-
+        <!-- main content -->
         <section class="flex flex-col lg:flex-row gap-4 mt-8">
             <div
                 id="pdf"
@@ -269,54 +286,6 @@ provide(templateProviderKey, { templates });
                     />
                 </div>
             </div>
-            <!-- <div
-                class="col-span-2 lg:col-span-1 rounded-md w-full h-[1015px] bg-[#5E4D47] relative overflow-hidden"
-            >
-                <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="656"
-                    height="387"
-                    viewBox="0 0 656 387"
-                    fill="none"
-                    class="w-[1120px] h-[400px] left-[-216px] absolute z-0"
-                >
-                    <path
-                        d="M908.5 -12.6711L990.5 -12.9483C922.81 -9.93829 750 413.035 592 385.5C537.997 376.089 496.525 292.25 440 264C378.751 233.391 329.315 275.759 274.038 298.654C203.676 327.799 167 230.29 72.1981 253.414C-24.5001 277 -189.5 498.5 -108.5 158.5L-12.5 36L-12.5 -2L741.994 -12.9483C746.508 -12.9483 792.994 -13.1776 792.994 -12.6711L908.5 -12.6711Z"
-                        fill="#AB8D82"
-                    />
-                </svg>
-
-                <div
-                    class="z-10 relative w-full h-full font-league-spartan p-10"
-                >
-                    <div class="w-full flex-column text-app-white h-[400px]">
-                        <div class="flex-end gap-8">
-                            <h2 class="p-0 m-0 text-[40px] font-bold">
-                                Pizza & Pinsa
-                            </h2>
-
-                            <img
-                                :src="
-                                    resolvePathUrl('images/Imagecafe_title.png')
-                                "
-                                alt="cate title"
-                                class="w-[75px] h-[75px] rounded-full"
-                            />
-                        </div>
-
-                        <div
-                            class="ml-4 sm:ml-8 lg:ml-16 xl:ml-24 text-right mt-6 text-[18px] font-bold leading-[1.33]"
-                        >
-                            Tauchen Sie ein in die Welt der Pizza und Pinsas und
-                            lassen Sie sich von den köstlichen Kreationen
-                            unserer Gastronomie verführen. Unsere handgemachten
-                            Pizzen und Pinsas sind wahre Genussmomente, die
-                            Ihren Gaumen verwöhnen und Ihr Herz höherschlagen
-                            lassen.
-                        </div>
-                    </div>
-                </div>
-            </div> -->
 
             <div class="flex-1 flex flex-col gap-4">
                 <AddRestuarantInformation />

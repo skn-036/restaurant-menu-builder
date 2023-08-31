@@ -30,14 +30,6 @@ export const corsOptions: CorsOptions = {
         else {
             return callback(null, env.ALLOWED_ORIGINS);
         }
-        // return callback(null, true);
-        // if (env.ENVIRONMENT === 'development' && !requestOrigin) {
-        //     callback(null, true);
-        // } else if (!requestOrigin) {
-        //     callback(new Error('origin header not present in the request'));
-        // } else if (env.ALLOWED_ORIGINS.includes(requestOrigin)) {
-        //     callback(null, true);
-        // } else callback(new Error('cors error'));
     },
     optionsSuccessStatus: 200,
 };
