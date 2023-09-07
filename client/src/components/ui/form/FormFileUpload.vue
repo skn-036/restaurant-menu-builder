@@ -11,8 +11,10 @@ import { useToast } from 'vue-toastification';
 type Props = {
     modelValue: File | string | null;
     toBase64: boolean;
-    label: string;
+    label?: string;
     uploadButtonText: string;
+    dimension?: { width: number; height: number };
+    preview: boolean;
 };
 
 type Emit = {
@@ -22,8 +24,8 @@ type Emit = {
 const props = withDefaults(defineProps<Props>(), {
     modelValue: null,
     toBase64: true,
-    label: 'Logo',
     uploadButtonText: 'Ändern',
+    preview: true,
 });
 
 const emit = defineEmits<Emit>();
@@ -51,10 +53,10 @@ const onFileUpload = async (event: Event) => {
 
     if (uploadedFile) {
         file.value = uploadedFile;
-        base64.value = await resizeAndConvertToBase64(file.value, {
-            width: 100,
-            height: 100,
-        });
+        base64.value = await resizeAndConvertToBase64(
+            file.value,
+            props.dimension
+        );
         emit('update:model-value', props.toBase64 ? base64.value : file.value);
     }
 };
@@ -66,17 +68,19 @@ const isValidImage = (file: File | null): boolean => {
 </script>
 <template>
     <div>
-        <FormLabel>{{ label }}</FormLabel>
+        <FormLabel v-if="label">{{ label }}</FormLabel>
         <div class="flex-start gap-4">
-            <img
-                v-if="base64"
-                :src="base64"
-                class="w-10 h-100 min-w-[40px] min-h-[40px] rounded-full"
-            />
-            <span
-                v-else
-                class="w-10 h-100 min-w-[40px] min-h-[40px] rounded-full bg-gray-300 border border-gray-200"
-            ></span>
+            <template v-if="preview">
+                <img
+                    v-if="base64"
+                    :src="base64"
+                    class="w-10 h-100 min-w-[40px] min-h-[40px] rounded-full"
+                />
+                <span
+                    v-else
+                    class="w-10 h-100 min-w-[40px] min-h-[40px] rounded-full bg-gray-300 border border-gray-200"
+                ></span>
+            </template>
 
             <label
                 :for="id"

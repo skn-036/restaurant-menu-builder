@@ -22,6 +22,7 @@ type Props = {
     clearable?: boolean;
     options: Option[];
     label?: string;
+    searchable?: boolean;
 };
 type Emit = {
     (e: 'update:model-value', data: ModelValue): void;
@@ -46,6 +47,7 @@ const props = withDefaults(defineProps<Props>(), {
     required: false,
     clearable: false,
     label: 'label',
+    searchable: true,
 });
 
 const emit = defineEmits<Emit>();

@@ -79,3 +79,7 @@ body {
         width: inherit;
     }
 }
+
+.Vue-Toastification__toast.Vue-Toastification__toast--info.menu-app-toast {
+    background-image: var(--gradient) !important;
+}

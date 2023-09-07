@@ -121,6 +121,8 @@ const onSubmit = async () => {
                     >
                         <FormFileUpload
                             v-model="formData.restaurant_information.logo"
+                            label="Logo"
+                            :dimension="{ width: 100, height: 100 }"
                         />
                     </FormTitleError>
                 </div>

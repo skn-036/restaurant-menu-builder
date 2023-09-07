@@ -3,7 +3,12 @@ import { computed, watch, ref, onMounted, onUnmounted } from 'vue';
 
 // @ts-ignore
 import SortableInstance from 'sortablejs/modular/sortable.complete.esm.js';
-import Sortable, { Options, SortableEvent, MoveEvent } from 'sortablejs';
+import Sortable, {
+    Options,
+    SortableEvent,
+    MoveEvent,
+    GroupOptions,
+} from 'sortablejs';
 
 import useVueContext from '@/composables/vue/useVueContext';
 import useCommonUtils from '@/composables/utils/useCommonUtils';
@@ -13,12 +18,14 @@ import { cloneDeep } from 'lodash';
 type Props = {
     items?: T[];
     modelValue?: T[];
-    itemKey: string;
-    tag: string;
-    disableItem:
+    itemKey?: string;
+    tag?: string;
+    disableItem?:
         | boolean
         | ((item: T, index: number, options: Options) => boolean);
-    removePayload: boolean;
+    removePayload?: boolean;
+    group?: string | GroupOptions;
+    handle?: string;
     dataTransfer?: (dataTransfer: DataTransfer, dragEl: HTMLElement) => void;
 };
 type Emit = {
@@ -59,13 +66,14 @@ const props = withDefaults(defineProps<Props>(), {
     itemKey: 'id',
     tag: 'div',
     disableItem: false,
-    removePayload: false,
+    removePayload: true,
 });
 
 const emit = defineEmits<Emit>();
 
 const { attributes, slotNames } = useVueContext();
-const { kebabToCamelCase, isJsonParsable } = useCommonUtils();
+const { kebabToCamelCase, isJsonParsable, filterPropsFromObject } =
+    useCommonUtils();
 
 const usingVModel = computed(
     () => props.modelValue !== undefined && Array.isArray(props.modelValue)
@@ -102,7 +110,14 @@ const onDrop = (evt: SortableEvent, type: string) => {
         items.splice(evt?.newDraggableIndex, 0, item);
     }
 
+    console.log(evt.oldDraggableIndex, evt.newDraggableIndex);
+
     const removePayloadEl = () => {
+        if (
+            evt.oldDraggableIndex === undefined &&
+            evt.newDraggableIndex === undefined
+        )
+            return;
         const itemParent = evt?.item?.parentElement;
         if (itemParent) itemParent?.removeChild(evt?.item);
     };
@@ -265,7 +280,9 @@ const sortableOptions = computed<Options>(() => {
         return { ...r, [kebabToCamelCase(key)]: val };
     }, {});
 
-    return Object.assign(defaultSortableOptions.value, options);
+    const propsOptions = filterPropsFromObject(props, ['group', 'handle']);
+
+    return Object.assign(defaultSortableOptions.value, options, propsOptions);
 });
 
 watch(

@@ -6,6 +6,7 @@ import FormFileUpload2 from './FormFileUpload2.vue';
 import FormInput from './FormInput.vue';
 import FormInput2 from './FormInput2.vue';
 import FormText from './FormText.vue';
+import FormColor from './FormColor.vue';
 
 export {
     FormTitleError,
@@ -16,4 +17,5 @@ export {
     FormInput,
     FormInput2,
     FormText,
+    FormColor,
 };
