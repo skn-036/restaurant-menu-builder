@@ -1,12 +1,13 @@
+import { v4 } from 'uuid';
 const useCommonUtils = () => {
     const wordCapitalize = (string: string): string =>
         string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
 
     const stringCapitalize = (string: string): string => {
         var capitalText = '';
-        string
-            .split(' ')
-            .forEach(word => (capitalText += ' ' + stringCapitalize(word)));
+        string.split(' ').forEach(word => {
+            capitalText = `${capitalText} ${wordCapitalize(word)}`;
+        });
         return capitalText.slice(1);
     };
 
@@ -35,6 +36,34 @@ const useCommonUtils = () => {
             .toLowerCase();
     };
 
+    const generateId = (prefix: string = '') => {
+        return `${prefix}${v4()}`;
+    };
+
+    const filterPropsFromObject = (
+        object: Record<string, any>,
+        filteringProps: string[] = []
+    ) => {
+        if (!filteringProps || !filteringProps.length) return object;
+        return Object.entries(object).reduce((fields, field) => {
+            if (filteringProps.includes(field[0]))
+                fields = { ...fields, [field[0]]: field[1] };
+            return fields;
+        }, {});
+    };
+
+    const omitPropsFromObject = (
+        object: Record<string, any>,
+        omittingProps: string[] = []
+    ) => {
+        if (!omittingProps || !omittingProps.length) return object;
+        return Object.entries(object).reduce((fields, field) => {
+            if (!omittingProps.includes(field[0]))
+                fields = { ...fields, [field[0]]: field[1] };
+            return fields;
+        }, {});
+    };
+
     return {
         wordCapitalize,
         stringCapitalize,
@@ -42,6 +71,9 @@ const useCommonUtils = () => {
         isJsonParsable,
         kebabToCamelCase,
         camelToKebabCase,
+        generateId,
+        filterPropsFromObject,
+        omitPropsFromObject,
     };
 };
 

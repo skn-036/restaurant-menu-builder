@@ -1,18 +1,36 @@
 <script setup lang="ts">
-interface Props {
-    label: string;
+type Props = {
+    label?: string;
     icon?: string;
-}
+    disabled: boolean;
+    onDisabledButtonClick?: () => void;
+};
 
-withDefaults(defineProps<Props>(), {
-    label: 'Button',
+type Emit = {
+    (e: 'click', event: MouseEvent): void;
+};
+
+const props = withDefaults(defineProps<Props>(), {
+    disabled: false,
 });
+
+const emit = defineEmits<Emit>();
+
+const onButtonClick = (event: MouseEvent) => {
+    if (!props.disabled) emit('click', event);
+    else {
+        if (typeof props.onDisabledButtonClick === 'function')
+            props.onDisabledButtonClick();
+    }
+};
 </script>
 
 <template>
     <button
         type="button"
         class="bg-gradient hover:bg-gradient-hover shadow-gradient inline-flex px-3 py-2 gap-4 justify-center items-center rounded-md text-app-white"
+        :class="[disabled ? 'opacity-50 !cursor-not-allowed' : '']"
+        @click="onButtonClick"
     >
         <slot>
             <slot name="icon">
@@ -26,7 +44,7 @@ withDefaults(defineProps<Props>(), {
             </slot>
 
             <slot name="label">
-                <span class="hidden sm:block font-semibold my-auto">{{
+                <span v-if="label" class="font-semibold my-auto">{{
                     label
                 }}</span>
             </slot>

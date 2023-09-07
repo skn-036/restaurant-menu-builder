@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount, provide } from 'vue';
+
+// components
 import Header from '@/components/layout/Header.vue';
+import ConfirmModal from '@/components/ui/modal/ConfirmModal.vue';
 
 import { appConfigProviderKey } from '@/symbols/app';
 
@@ -32,4 +35,6 @@ provide(appConfigProviderKey, { windowWidth });
             </RouterView>
         </main>
     </div>
+
+    <ConfirmModal />
 </template>

@@ -23,6 +23,7 @@ const toastOptions: PluginOptions = {
     pauseOnFocusLoss: false,
     hideProgressBar: true,
     timeout: 8000,
+    toastClassName: 'menu-app-toast',
 };
 
 const app = createApp(App);

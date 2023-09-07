@@ -10,6 +10,10 @@ const menus: NavMenu[] = [
         route: '/',
     },
     {
+        title: 'Template builder',
+        route: '/template-builder',
+    },
+    {
         title: 'Speisekartengenerator',
         route: '/speisekartengenerator',
     },
