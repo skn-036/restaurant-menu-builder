@@ -80,7 +80,6 @@ const onBuilderItemAdd = (builderItem: TemplateBuilderItem) => {
         ...builderItem,
         id: generateId(`${builderItem.id.split('-')[0]}-`),
     };
-    console.log(itemToBeAdded);
 
     const addItemToActiveItem = (itemInTemplate: TemplateBuilderItem) => {
         if (itemInTemplate.id === props.activeTemplate.id) {

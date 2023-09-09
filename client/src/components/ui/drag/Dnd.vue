@@ -110,7 +110,8 @@ const onDrop = (evt: SortableEvent, type: string) => {
         items.splice(evt?.newDraggableIndex, 0, item);
     }
 
-    console.log(evt.oldDraggableIndex, evt.newDraggableIndex);
+    console.log(type, item, items);
+    // console.log(evt.oldDraggableIndex, evt.newDraggableIndex);
 
     const removePayloadEl = () => {
         if (
@@ -118,6 +119,7 @@ const onDrop = (evt: SortableEvent, type: string) => {
             evt.newDraggableIndex === undefined
         )
             return;
+
         const itemParent = evt?.item?.parentElement;
         if (itemParent) itemParent?.removeChild(evt?.item);
     };

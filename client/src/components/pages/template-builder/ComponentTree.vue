@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 // components
-import Dnd from '@/components/ui/drag/Dnd.vue';
+// import Dnd from '@/components/ui/drag/Dnd.vue';
+import { SmoothDnd } from '@/components/ui/drag';
 import ComponentTree from '@/components/pages/template-builder/ComponentTree.vue';
 
 // composables
@@ -46,7 +47,7 @@ const onDelete = (templateItem: TemplateBuilderItem) => {
 </script>
 
 <template>
-    <div class="w-full">
+    <div class="w-full h-max">
         <div
             class="w-full flex-between p-2 rounded-md"
             :class="
@@ -56,7 +57,13 @@ const onDelete = (templateItem: TemplateBuilderItem) => {
             "
         >
             <div class="flex-start">
+                <!-- templateItem.children.length
+                            ? ''
+                            : templateItem.id === activeTemplateItem.id
+                            ? 'text-[#D15258]'
+                            : 'text-[#f3f4f6]', -->
                 <Icon
+                    v-if="templateItem.children.length"
                     type="chevron-down"
                     size="16"
                     stroke-width="3px"
@@ -65,11 +72,6 @@ const onDelete = (templateItem: TemplateBuilderItem) => {
                         !showChildItems || !templateItem.children.length
                             ? '-rotate-90'
                             : '',
-                        templateItem.children.length
-                            ? ''
-                            : templateItem.id === activeTemplateItem.id
-                            ? 'text-[#D15258]'
-                            : 'text-[#f3f4f6]',
                     ]"
                     @click.native.stop="onChildItemsToggle"
                 />
@@ -78,6 +80,7 @@ const onDelete = (templateItem: TemplateBuilderItem) => {
                     @click="$emit('update-active-template', templateItem)"
                 >
                     {{ templateItem.title }}
+                    <!-- {{ templateItem.componentType }} -->
                 </div>
             </div>
 
@@ -93,22 +96,20 @@ const onDelete = (templateItem: TemplateBuilderItem) => {
             </div>
         </div>
 
-        <!-- v-if="templateItem.children.length && showChildItems" -->
-        <div class="py-1 pl-6">
-            <!-- :group="templateItem.id" -->
-            <Dnd
-                v-model="(templateItem.children as TemplateBuilderItem[])"
-                group="component-drag"
-                handle=".drag-el"
-                remove-payload
+        <div
+            v-if="templateItem.children.length && showChildItems"
+            class="py-1 pl-6"
+        >
+            <SmoothDnd
+                :options="templateItem.children"
+                group-name="component-drag"
+                drag-handle-selector=".drag-el"
             >
-                <template #item="{ item, cssClass }">
+                <template #option="{ option }">
                     <ComponentTree
-                        v-if="showChildItems"
-                        :template-item="item"
+                        :template-item="option"
                         :active-template-item="activeTemplateItem"
                         is-children
-                        :class="[cssClass]"
                         @update-active-template="
                             updateItem =>
                                 $emit('update-active-template', updateItem)
@@ -118,14 +119,7 @@ const onDelete = (templateItem: TemplateBuilderItem) => {
                         "
                     />
                 </template>
-
-                <template #no-items>
-                    <div
-                        v-if="templateItem.componentType === 'container'"
-                        class="w-full h-2"
-                    ></div>
-                </template>
-            </Dnd>
+            </SmoothDnd>
         </div>
     </div>
 </template>

@@ -1,3 +1,18 @@
+export type TemplateBuilderItem = {
+    id: string;
+    title?: string;
+    tag: string;
+    componentType: 'container' | 'wrapper' | 'text' | 'image';
+    class?: string;
+    style: Record<string, string | number>;
+    dynamicStyle: Record<string, string | number>;
+    content?: string;
+    children: TemplateBuilderItem[];
+    props: Record<string, any>;
+    attrs: Record<string, any>;
+    canAddChild: boolean;
+};
+
 export type Template = {
     id: string;
     name: string;
@@ -5,7 +20,9 @@ export type Template = {
     container: string;
     restaurant: string;
     product: string;
-    mapper: { key: string; A4: string; A5: string }[];
+    restaurantBuilder: TemplateBuilderItem;
+    productBuilder: TemplateBuilderItem;
+    mapper?: { key: string; A4: string; A5: string }[];
     demo_content?: string | null;
 };
 

@@ -5,9 +5,65 @@ import useCommonUtils from '@/composables/utils/useCommonUtils';
 
 // types
 import { TemplateBuilderItem } from '@/types/home/home';
+type HtmlMapper = {
+    searchClass: string;
+    replacer: string;
+    isImage: boolean;
+};
 
 const useCreateTemplate = (content: 'restaurant' | 'product') => {
     const { generateId } = useCommonUtils();
+
+    const containerCssSelector = `#${content}-template-builder`;
+    const activeBorder = [
+        'border: 2px solid rgb(239, 99, 68);',
+        'border: 2px solid #EF6344;',
+    ];
+
+    const htmlStringMapper = computed<{
+        restaurant: HtmlMapper[];
+        product: HtmlMapper[];
+    }>(() => ({
+        restaurant: [
+            {
+                searchClass: 'restaurant-title',
+                replacer: '[{template_restaurant_name}]',
+                isImage: false,
+            },
+            {
+                searchClass: 'restaurant-logo',
+                replacer: '[{template_restaurant_logo}]',
+                isImage: true,
+            },
+            {
+                searchClass: 'restaurant-description',
+                replacer: '{[template_restaurant_description]}',
+                isImage: false,
+            },
+        ],
+        product: [
+            {
+                searchClass: 'product-title',
+                replacer: '{[template_product_name]}',
+                isImage: false,
+            },
+            {
+                searchClass: 'product-logo',
+                replacer: '[{template_product_logo}]',
+                isImage: true,
+            },
+            {
+                searchClass: 'product-description',
+                replacer: '{[template_product_description]}',
+                isImage: false,
+            },
+            {
+                searchClass: 'product-price',
+                replacer: '{[template_product_price]}',
+                isImage: false,
+            },
+        ],
+    }));
 
     const restaurantContainer = computed<TemplateBuilderItem>(() => ({
         id: generateId('restaurant-'),
@@ -16,6 +72,7 @@ const useCreateTemplate = (content: 'restaurant' | 'product') => {
         class: 'wrapper-div restaurant-container',
         style: {
             width: '100%',
+            minWidth: '0px',
             height: 'auto',
             display: 'flex',
             flexDirection: 'column',
@@ -23,7 +80,7 @@ const useCreateTemplate = (content: 'restaurant' | 'product') => {
             alignItems: 'flex-start',
             gap: '16px',
             marginTop: 0,
-            marginBottom: 0,
+            marginBottom: '24px',
             marginLeft: 0,
             marginRight: 0,
             paddingTop: 0,
@@ -31,7 +88,7 @@ const useCreateTemplate = (content: 'restaurant' | 'product') => {
             paddingLeft: 0,
             paddingRight: 0,
         },
-        dynamicStyle: { minHeight: '480px' },
+        dynamicStyle: {},
         props: {},
         attrs: {},
         title: 'Restaurant template',
@@ -46,14 +103,15 @@ const useCreateTemplate = (content: 'restaurant' | 'product') => {
         class: 'wrapper-div product-container',
         style: {
             width: '100%',
+            minWidth: '0px',
             height: 'auto',
             display: 'flex',
-            flexDirection: 'row',
+            flexDirection: 'column',
             justifyContent: 'flex-start',
             alignItems: 'flex-start',
-            gap: '32px',
+            gap: '16px',
             marginTop: 0,
-            marginBottom: 0,
+            marginBottom: '24px',
             marginLeft: 0,
             marginRight: 0,
             paddingTop: 0,
@@ -61,7 +119,7 @@ const useCreateTemplate = (content: 'restaurant' | 'product') => {
             paddingLeft: 0,
             paddingRight: 0,
         },
-        dynamicStyle: { minHeight: '480px' },
+        dynamicStyle: {},
         props: {},
         attrs: {},
         title: 'Product template',
@@ -76,6 +134,7 @@ const useCreateTemplate = (content: 'restaurant' | 'product') => {
         class: 'wrapper-item',
         style: {
             width: '100%',
+            minWidth: '0px',
             height: 'auto',
             display: 'flex',
             flexDirection: 'row',
@@ -91,7 +150,7 @@ const useCreateTemplate = (content: 'restaurant' | 'product') => {
             paddingLeft: 0,
             paddingRight: 0,
         },
-        dynamicStyle: { minHeight: '30px' },
+        dynamicStyle: {},
         props: {},
         attrs: {},
         children: [],
@@ -104,6 +163,8 @@ const useCreateTemplate = (content: 'restaurant' | 'product') => {
         componentType: 'text',
         class: 'item-title',
         style: {
+            width: 'auto',
+            height: 'auto',
             fontSize: '30px',
             lineHeight: '38px',
             fontWeight: '700',
@@ -111,7 +172,6 @@ const useCreateTemplate = (content: 'restaurant' | 'product') => {
             textAlign: 'left',
             textDecoration: 'none',
             fontStyle: 'normal',
-            width: 'max-content',
             marginTop: 0,
             marginBottom: 0,
             marginLeft: 0,
@@ -120,6 +180,8 @@ const useCreateTemplate = (content: 'restaurant' | 'product') => {
             paddingBottom: 0,
             paddingLeft: 0,
             paddingRight: 0,
+            whiteSpace: 'normal',
+            overflowWrap: 'break-word',
         },
         dynamicStyle: {},
         props: {},
@@ -177,7 +239,9 @@ const useCreateTemplate = (content: 'restaurant' | 'product') => {
                 ...templateItem,
                 dynamicStyle: {
                     ...templateItem.dynamicStyle,
-                    border: '2px solid #EF6344',
+                    border: activeBorder[1]
+                        .replace('border: ', '')
+                        .replace(';', ''),
                 },
             };
         else
@@ -240,6 +304,54 @@ const useCreateTemplate = (content: 'restaurant' | 'product') => {
         );
     };
 
+    const templateString = ref<string>('');
+    const setTemplateString = (template: TemplateBuilderItem) => {
+        if (!template) return '';
+
+        const container = document.querySelector(containerCssSelector);
+
+        if (!container) return '';
+
+        let containerHtml = container.innerHTML;
+        activeBorder.forEach(border => {
+            containerHtml = containerHtml.split(border).join('');
+        });
+
+        const parser = new DOMParser();
+        const html = parser.parseFromString(containerHtml, 'text/html');
+
+        const body = html.body;
+        const mapper = htmlStringMapper.value[content];
+
+        mapper.forEach(m => {
+            const els = body.querySelectorAll(`.${m.searchClass}`);
+            Array.from(els).forEach(el => {
+                if (m.isImage) {
+                    if (el.tagName === 'IMG') {
+                        const image = el as HTMLImageElement;
+                        image.src = m.replacer;
+                        image.style.display = `table-caption`; // as dislay table-caption not used anywhere we will use it later
+                        // to set image display
+                    }
+                } else {
+                    el.textContent = m.replacer;
+                }
+            });
+        });
+
+        return body.innerHTML
+            .split('table-caption')
+            .join(`[{template_${content}_logo_display}]`);
+    };
+
+    const resetTemplate = () => {
+        template.value =
+            content === 'restaurant'
+                ? restaurantContainer.value
+                : productContainer.value;
+        activeTemplate.value = { ...template.value };
+    };
+
     return {
         restaurantContainer,
         productContainer,
@@ -250,6 +362,9 @@ const useCreateTemplate = (content: 'restaurant' | 'product') => {
         dynamicTemplate,
         activeTemplate,
         generateHtml,
+        templateString,
+        setTemplateString,
+        resetTemplate,
     };
 };
 
