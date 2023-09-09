@@ -1,15 +1,24 @@
 <script setup lang="ts">
-import { defineAsyncComponent, computed, ref, watch, provide } from 'vue';
+import {
+    defineAsyncComponent,
+    computed,
+    ref,
+    provide,
+    watchEffect,
+    nextTick,
+} from 'vue';
 
 // components
 import Tab from '@/components/ui/tab/Tab.vue';
+import Button from '@/components/ui/buttons/Button.vue';
 
 // composables
 import useCreateTemplate from '@/composables/template/useCreateTemplate';
+import useHttpRequest from '@/composables/request/useHttpRequest';
 
 // 3rd party import
 import { v4 } from 'uuid';
-import { cloneDeep } from 'lodash';
+import { useToast } from 'vue-toastification';
 
 // types
 import { UiTab } from '@/types/ui/ui';
@@ -34,13 +43,20 @@ const {
     dynamicTemplate: dynamicRestaurantTemplate,
     template: restaurantTemplate,
     activeTemplate: activeRestaurantTemplate,
+    templateString: restauranTemplateString,
+    resetTemplate: resetRestaurantTemplate,
 } = useCreateTemplate('restaurant');
 
 const {
     dynamicTemplate: dynamicProductTemplate,
     template: productTemplate,
     activeTemplate: activeProductTemplate,
+    templateString: productTemplateString,
+    resetTemplate: resetProductTemplate,
 } = useCreateTemplate('product');
+
+const toast = useToast();
+const { save: saveTemplate } = useHttpRequest('/api/templates');
 
 /**
  * ----------------------------------------------------------------------------------------
@@ -81,29 +97,33 @@ const onGoToTab = (tabName: Tab['tab']) => {
     activeTab.value = newTab;
 };
 
-const isTabDisabled = (tab: UiTab) => {
-    return false;
-    if (tab.tab === 'template_information') return false;
-    else return !Boolean(templateData.value.name);
-};
-
 /**
  * ----------------------------------------------------------------------------------------
  * Data collection
  * ----------------------------------------------------------------------------------------
  */
 const templateData = ref<Template>({
-    id: v4(),
+    id: `template-${v4()}`,
     name: '',
     background: '',
-    container: '',
+    container: `<div class="page-root [{page_root_class}]" style="[{page_root_style}]">
+        <div style="width: 100%;">[{restaurant_template}]</div>
+        <div style="width: 100%;">[{product_template}]</div>
+    </div>`,
     restaurant: '',
+    restaurantBuilder: restaurantTemplate.value,
     product: '',
+    productBuilder: productTemplate.value,
 });
-watch(
-    () => cloneDeep(templateData.value),
-    v => console.log(v)
-);
+watchEffect(() => {
+    templateData.value = {
+        ...templateData.value,
+        restaurant: restauranTemplateString.value,
+        restaurantBuilder: restaurantTemplate.value,
+        product: productTemplateString.value,
+        productBuilder: productTemplate.value,
+    };
+});
 
 /**
  * ----------------------------------------------------------------------------------------
@@ -118,10 +138,9 @@ const onActiveRestaurantTemplateUpdate = (
 ) => {
     activeRestaurantTemplate.value = updatedActiveTemplate;
 };
-watch(
-    () => cloneDeep(activeRestaurantTemplate.value),
-    () => console.log('ehl', activeRestaurantTemplate.value.id)
-);
+const onRestaurantTemplateStringUpdate = (templateString: string) => {
+    restauranTemplateString.value = templateString;
+};
 /**
  * ----------------------------------------------------------------------------------------
  * product template builder
@@ -135,6 +154,60 @@ const onActiveProductTemplateUpdate = (
 ) => {
     activeProductTemplate.value = updatedActiveTemplate;
 };
+const onProductTemplateStringUpdate = (templateString: string) => {
+    productTemplateString.value = templateString;
+};
+
+/**
+ * ----------------------------------------------------------------------------------------
+ * saving the template
+ * ----------------------------------------------------------------------------------------
+ */
+const onSaveTemplate = async () => {
+    if (!templateData.value.name) {
+        toast.info('Template name is required...');
+        return;
+    }
+
+    if (
+        !templateData.value.restaurant ||
+        !templateData.value.restaurantBuilder.children.length
+    ) {
+        toast.info('Restaurant template is not set...');
+        return;
+    }
+
+    if (
+        !templateData.value.product ||
+        !templateData.value.productBuilder.children.length
+    ) {
+        toast.info('Product template is not set...');
+        return;
+    }
+
+    const template = await saveTemplate<Template>({ ...templateData.value });
+    if (template?.id) {
+        toast.info('Template created...');
+
+        templateData.value = {
+            ...templateData.value,
+            id: `template-${v4()}`,
+            name: '',
+            background: '',
+            container: `<div class="page-root [{page_root_class}]" style="[{page_root_style}]">
+                <div style="width: 100%;">[{restaurant_template}]</div>
+                <div style="width: 100%;">[{product_template}]</div>
+            </div>`,
+            restaurant: '',
+            product: '',
+        };
+        await nextTick();
+        resetRestaurantTemplate();
+
+        await nextTick();
+        resetProductTemplate();
+    }
+};
 
 /**
  * ----------------------------------------------------------------------------------------
@@ -145,16 +218,20 @@ provide(RestaurantProviderKey, {
     dynamicRestaurantTemplate,
     restaurantTemplate,
     activeRestaurantTemplate,
+    restauranTemplateString,
     onRestaurantTemplateUpdate,
     onActiveRestaurantTemplateUpdate,
+    onRestaurantTemplateStringUpdate,
 });
 
 provide(ProductProviderKey, {
     dynamicProductTemplate,
     productTemplate,
     activeProductTemplate,
+    productTemplateString,
     onProductTemplateUpdate,
     onActiveProductTemplateUpdate,
+    onProductTemplateStringUpdate,
 });
 </script>
 
@@ -162,18 +239,22 @@ provide(ProductProviderKey, {
     <div class="py-8">
         <Tab
             :tabs="tabs"
-            v-slot="{ activeTab: tab }"
             :active-tab="activeTab"
-            :disabled="isTabDisabled"
             @on-tab-change="((tab: Tab) => (activeTab = tab))"
         >
-            <Component
-                :is="components[activeTab.tab]"
-                :tab="tab"
-                :template-data="templateData"
-                @update:template-data="(data: Template) => (templateData = data)"
-                @go-to-tab="onGoToTab"
-            />
+            <template #default="{ activeTab: tab }">
+                <Component
+                    :is="components[activeTab.tab]"
+                    :tab="(tab as Tab)"
+                    :template-data="templateData"
+                    @update:template-data="(data: Template) => (templateData = data)"
+                    @go-to-tab="onGoToTab"
+                />
+            </template>
+
+            <template #after_tab_button>
+                <Button label="Save template..." @click="onSaveTemplate" />
+            </template>
         </Tab>
     </div>
 </template>

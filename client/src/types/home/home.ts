@@ -1,5 +1,20 @@
 import { CSSProperties } from 'vue';
 
+export type TemplateBuilderItem = {
+    id: string;
+    title?: string;
+    tag: string;
+    componentType: 'container' | 'wrapper' | 'text' | 'image';
+    class?: string;
+    style: CSSProperties;
+    dynamicStyle: CSSProperties;
+    content?: string;
+    children: TemplateBuilderItem[];
+    props: Record<string, any>;
+    attrs: Record<string, any>;
+    canAddChild: boolean;
+};
+
 export type Template = {
     id: string;
     name: string;
@@ -7,6 +22,8 @@ export type Template = {
     container: string;
     restaurant: string;
     product: string;
+    restaurantBuilder: TemplateBuilderItem;
+    productBuilder: TemplateBuilderItem;
     mapper?: { key: string; A4: string; A5: string }[];
     demo_content?: string | null;
 };
@@ -37,20 +54,4 @@ export type TemplateInformation = {
     template: Template;
     restaurant_information: RestaurantInformation;
     products: Product[];
-};
-
-export type TemplateBuilderItem = {
-    id: string;
-    title?: string;
-    tag: string;
-    componentType: 'container' | 'wrapper' | 'text' | 'image';
-    class?: string;
-    // defaultStyle: CSSProperties;
-    style: CSSProperties;
-    dynamicStyle: CSSProperties;
-    content?: string;
-    children: TemplateBuilderItem[];
-    props: Record<string, any>;
-    attrs: Record<string, any>;
-    canAddChild: boolean;
 };

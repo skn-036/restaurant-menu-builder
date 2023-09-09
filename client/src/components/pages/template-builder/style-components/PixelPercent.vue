@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watchEffect, watch } from 'vue';
+import { ref, watchEffect, watch, nextTick } from 'vue';
 
 import BaseStyle from './BaseStyle.vue';
 import { FormInput, FormSelect } from '@/components/ui/form';
@@ -51,8 +51,11 @@ watch(
 );
 watch(
     () => cssValue.value,
-    () => {
+    async () => {
         if (props.propName !== 'fontSize') return;
+
+        await nextTick();
+
         const intCssVal = parseInt(cssValue.value);
         if (isNaN(intCssVal)) return;
 

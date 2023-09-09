@@ -1,9 +1,11 @@
 <script setup lang="ts">
-import { ref, watchEffect, computed } from 'vue';
+import { ref, watchEffect, watch } from 'vue';
 
 // components
 import { FormInput, FormFileUpload } from '@/components/ui/form';
-import Button from '@/components/ui/buttons/Button.vue';
+
+// 3rd party
+import { cloneDeep } from 'lodash';
 
 // types
 import { Template } from '@/types/home/home';
@@ -34,29 +36,28 @@ watchEffect(() => {
     formData.value = { ...props.templateData };
 });
 
-const onSubmit = () => {
-    if (!canSubmit.value) return;
-
-    emit('update:template-data', formData.value);
-    if (formData.value.name) emit('go-to-tab', 'restaurant_information');
-};
-
-const canSubmit = computed(() =>
-    Boolean(formData.value.name || props.templateData.name)
+watch(
+    () => cloneDeep(formData.value),
+    () => {
+        emit('update:template-data', formData.value);
+    }
 );
+
+// const onSubmit = () => {
+//     if (!canSubmit.value) return;
+
+//     emit('update:template-data', formData.value);
+//     if (formData.value.name) emit('go-to-tab', 'restaurant_information');
+// };
+
+// const canSubmit = computed(() =>
+//     Boolean(formData.value.name || props.templateData.name)
+// );
 </script>
 
 <template>
     <div class="w-full py-4 rounded-md h-full">
         <div class="w-[793px] max-w-full mx-auto">
-            <div class="w-full flex-end">
-                <Button
-                    label="Submit & continue..."
-                    :disabled="!canSubmit"
-                    @click="onSubmit"
-                />
-            </div>
-
             <FormInput
                 v-model="formData.name"
                 class="w-full"

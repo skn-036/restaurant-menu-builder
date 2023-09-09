@@ -1,5 +1,7 @@
 <script setup lang="ts">
-import { ref, provide, watch, inject, onBeforeMount } from 'vue';
+import { ref, provide, watch, onBeforeMount } from 'vue';
+
+// components
 import { Button } from '@/components/ui/buttons';
 import { Title } from '@/components/ui/components';
 import {
@@ -8,11 +10,16 @@ import {
     Pagination,
 } from '@/components/pages/home';
 
+// composables
 import useHttpRequest from '@/composables/request/useHttpRequest';
 import useEnv from '@/composables/env/useEnv';
 import useTemplate from '@/composables/template/useTemplate';
 
+// 3rd party import
 import { cloneDeep } from 'lodash';
+
+// data
+import defaultTemplates from '@/data/templates';
 
 // types and injection symbols
 import {
@@ -21,22 +28,17 @@ import {
     Template,
     PageSize,
 } from '@/types/home/home';
-import { AppConfig } from '@/types/layout/app';
 
 import {
     productProviderKey,
     templateInformationProviderKey,
     templateProviderKey,
 } from '@/symbols/home/home';
-import { appConfigProviderKey } from '@/symbols/app';
 
-import defaultTemplates from '@/data/templates';
-
-// @ts-ignore
-const { windowWidth } = inject(appConfigProviderKey) as AppConfig;
+// composables extraction
 const { pageSizes } = useTemplate();
 const { save: generatePreview, saving: previewLoading } =
-    useHttpRequest('api/pdf/preview');
+    useHttpRequest('/api/pdf/preview');
 const { env } = useEnv();
 
 /**
@@ -44,10 +46,24 @@ const { env } = useEnv();
  * template data...
  * -----------------------------------------------------------------------------
  */
-const templates = ref<Template[]>([...defaultTemplates]);
+const { getList: getTemplates } = useHttpRequest('/api/templates');
+const templates = ref<Template[]>([]);
+const onTemplateGet = async () => {
+    templates.value = await getTemplates<Template[]>();
+    if (!templateInformation.value.template && templates.value.length) {
+        templateInformation.value = {
+            ...templateInformation.value,
+            template: templates.value[0],
+        };
+    }
+};
+onBeforeMount(() => {
+    onTemplateGet();
+});
+
 const templateInformation = ref<TemplateInformation>({
     pageSize: pageSizes.find(pageSize => pageSize.size === 'A4') as PageSize,
-    template: defaultTemplates[0],
+    template: templates.value.length ? templates.value[0] : defaultTemplates[0],
     restaurant_information: {
         name: null,
         description: '',
@@ -267,7 +283,11 @@ provide(templateProviderKey, { templates });
                 >
                     <img
                         v-if="!activePreview"
-                        :src="templateInformation.template.background"
+                        :src="
+                            templateInformation.template
+                                ? templateInformation.template.background
+                                : ''
+                        "
                         class="w-full h-full rounded-md"
                     />
 

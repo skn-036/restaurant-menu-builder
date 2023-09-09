@@ -84,6 +84,8 @@ const resolveProducts = (
             .join(product.id)
             .split('[{template_product_logo}]')
             .join(product.logo ? product.logo : '')
+            .split('[{template_product_logo_display}]')
+            .join(product.logo ? 'block' : 'none')
             .split('{[template_product_name]}')
             .join(product.name ? product.name : '')
             .split('{[template_product_description]}')
@@ -97,9 +99,9 @@ const resolveProducts = (
                 !product.price
                     ? ''
                     : typeof product.price === 'string'
-                    ? product.price
+                    ? `€${product.price}`
                     : typeof product.price === 'number'
-                    ? product.price.toString()
+                    ? `€${product.price.toString()}`
                     : ''
             );
 
@@ -119,6 +121,8 @@ const resolveSizes = (
     const { template, pageSize } = templateInformation;
     const { mapper } = template;
     const { size } = pageSize;
+
+    if (!mapper) return templateString;
 
     mapper.forEach(map => {
         templateString = templateString.split(map.key).join(map[size]);

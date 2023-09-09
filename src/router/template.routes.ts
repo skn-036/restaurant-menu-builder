@@ -5,7 +5,7 @@ import {
     save,
     update,
     destroy,
-} from '@/controllers/product.controller';
+} from '@/controllers/template.controller';
 
 const router = express.Router();
 

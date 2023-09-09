@@ -13,14 +13,6 @@ const menus: NavMenu[] = [
         title: 'Template builder',
         route: '/template-builder',
     },
-    {
-        title: 'Speisekartengenerator',
-        route: '/speisekartengenerator',
-    },
-    {
-        title: 'Erstellte Karten',
-        route: '/erstellte-karten',
-    },
 ];
 </script>
 

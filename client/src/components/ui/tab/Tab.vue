@@ -82,8 +82,8 @@ const onTabClick = (tab: UiTab) => {
 
 <template>
     <div class="w-full flex flex-col">
-        <div class="flex-between w-full">
-            <div class="flex-1 border-b border-slate-300 flex-start flex-wrap">
+        <div class="flex-between w-full border-b border-slate-300">
+            <div class="flex-start flex-wrap">
                 <div
                     v-for="tabItem in headerTabs"
                     :key="tabItem.tab"
@@ -106,7 +106,6 @@ const onTabClick = (tab: UiTab) => {
                     {{ tabItem.title }}
                 </div>
             </div>
-
             <slot name="after_tab_button"></slot>
         </div>
 

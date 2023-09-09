@@ -1,5 +1,13 @@
 <script setup lang="ts">
-import { computed, inject, CSSProperties, ref, watch, onMounted } from 'vue';
+import {
+    computed,
+    inject,
+    CSSProperties,
+    ref,
+    watch,
+    onMounted,
+    nextTick,
+} from 'vue';
 
 // components
 import ItemBuilder from '@/components/pages/template-builder/ItemBuilder.vue';
@@ -9,6 +17,9 @@ import ItemStyle from '@/components/pages/template-builder/ItemStyle.vue';
 import useCreateTemplate from '@/composables/template/useCreateTemplate';
 import useCommonUtils from '@/composables/utils/useCommonUtils';
 import useFile from '@/composables/files/useFile';
+
+// 3rd party
+import { cloneDeep } from 'lodash';
 
 // types
 import { RestaurantProvider } from '@/types/providers/template-builder';
@@ -41,6 +52,7 @@ const {
     activeRestaurantTemplate,
     onRestaurantTemplateUpdate,
     onActiveRestaurantTemplateUpdate,
+    onRestaurantTemplateStringUpdate,
 } = inject(RestaurantProviderKey) as RestaurantProvider;
 
 const { windowWidth } = inject(appConfigProviderKey) as AppConfig;
@@ -51,7 +63,8 @@ const { windowWidth } = inject(appConfigProviderKey) as AppConfig;
  * ----------------------------------------------------------------------------------------
  */
 const BUILDER = 'restaurant';
-const { generateHtml, wrapper, title, image } = useCreateTemplate(BUILDER);
+const { generateHtml, setTemplateString, wrapper, title, image } =
+    useCreateTemplate(BUILDER);
 const { generateId } = useCommonUtils();
 const { resolvePathUrl } = useFile();
 
@@ -78,8 +91,10 @@ watch(
 const containerStyle = computed<CSSProperties>(() => {
     let style: CSSProperties = {
         width: `${PAGEWIDTH}px`,
+        padding: '72px',
         scale: previewWidth.value / PAGEWIDTH,
         transformOrigin: 'left top',
+        height: '842px',
     };
     if (props.templateData.background)
         style = {
@@ -145,10 +160,28 @@ const onBuilderItemUpdate = (
     onRestaurantTemplateUpdate(template);
     if (activeTemplate) onActiveRestaurantTemplateUpdate(activeTemplate);
 };
+
+/**
+ * ----------------------------------------------------------------------------------------
+ * template string
+ * ----------------------------------------------------------------------------------------
+ */
+const updateTemplateString = async () => {
+    await nextTick();
+    const str = setTemplateString(restaurantTemplate.value);
+    onRestaurantTemplateStringUpdate(str);
+};
+updateTemplateString();
+watch(
+    () => cloneDeep(restaurantTemplate.value),
+    () => {
+        updateTemplateString();
+    }
+);
 </script>
 
 <template>
-    <div class="w-full grid grid-cols-12 gap-4 h-full">
+    <div class="w-full grid grid-cols-12 gap-4 h-full border-t border-gray-300">
         <div class="col-span-12 lg:col-span-3 h-full py-6">
             <ItemBuilder
                 :builder-items="builderItems"
@@ -169,7 +202,7 @@ const onBuilderItemUpdate = (
             ref="preview"
             class="col-span-12 lg:col-span-6 border-x border-gray-300 px-4 h-full py-6"
         >
-            <div id="restuarant-template-builder" :style="containerStyle">
+            <div id="restaurant-template-builder" :style="containerStyle">
                 <render />
             </div>
         </div>

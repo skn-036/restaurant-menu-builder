@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { inject } from 'vue';
 import { ProductCard } from '@/components/pages/home';
-import { Dnd } from '@/components/ui/drag';
+import { SmoothDnd } from '@/components/ui/drag';
 
 import { Product } from '@/types/home/home';
 import { templateInformationProviderKey } from '@/symbols/home/home';
@@ -12,24 +12,35 @@ type Emit = {
 
 defineEmits<Emit>();
 
-const { templateInformation } = inject(
+const { templateInformation, onUpdateTemplateInformation } = inject(
     templateInformationProviderKey
 ) as TemplateInformationProvider;
+
+const onDrop = (products: Product[]) => {
+    const updatedTemplateInformation = {
+        ...templateInformation.value,
+        products,
+    };
+    onUpdateTemplateInformation(updatedTemplateInformation);
+};
 </script>
 
 <template>
     <div class="flex flex-col gap-4">
         <div class="text=[#101010] font-bold">Hinzugefügt</div>
 
-        <!-- @vue-ignore -->
-        <Dnd v-model="templateInformation.products" handle=".drag-handle">
-            <template #item="{ item: product, cssClass }">
+        <SmoothDnd
+            :options="templateInformation.products"
+            drag-handle-selector=".drag-handle"
+            ghost-preview-background="#d1d1d1"
+            @drop="(products: Product[]) => onDrop(products)"
+        >
+            <template #option="{ option: product }">
                 <ProductCard
-                    :product="(product as Product)"
-                    :class="[cssClass]"
+                    :product="product"
                     @update:product="(product: Product) => $emit('update:product', product)"
                 />
             </template>
-        </Dnd>
+        </SmoothDnd>
     </div>
 </template>

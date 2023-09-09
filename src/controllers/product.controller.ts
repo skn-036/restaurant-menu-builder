@@ -1,16 +1,8 @@
-import { Request, Response } from 'express';
-import fs from 'fs';
 import path from 'path';
+import crudController from '@/composables/crud-controller';
 
-export const get = async (req: Request, res: Response) => {
-    try {
-        const filePath = path.join(__dirname, '../data/products.json');
-        const fileContent = await fs.promises.readFile(filePath, 'utf-8');
-        const data = JSON.parse(fileContent);
+import { Product } from '@/types/pdf';
 
-        res.send(data);
-    } catch (error) {
-        console.log(error);
-        res.send([]);
-    }
-};
+const filePath = path.join(__dirname, '../data/products.json');
+export const { getList, get, save, update, destroy } =
+    crudController<Product>(filePath);
