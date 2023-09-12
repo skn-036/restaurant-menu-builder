@@ -39,7 +39,8 @@ const useFile = () => {
 
     const resizeAndConvertToBase64 = async (
         file: File,
-        dimension?: { width: number; height: number }
+        dimension?: { width: number; height: number },
+        resizeSmallerSizeToHigher: boolean = true
     ): Promise<string> => {
         return new Promise(async resolve => {
             const imageDimension = await getImageDimensions(file);
@@ -51,8 +52,9 @@ const useFile = () => {
             }
 
             if (
-                imageDimension.width < dimension.width ||
-                imageDimension.height < dimension.height
+                !resizeSmallerSizeToHigher &&
+                (imageDimension.width < dimension.width ||
+                    imageDimension.height < dimension.height)
             ) {
                 const base64 = await toBase64(file);
                 resolve(base64);
