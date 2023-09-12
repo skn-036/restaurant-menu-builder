@@ -7,7 +7,7 @@ const useFile = () => {
      */
     const resolvePathUrl = (
         assetPath: string,
-        pathPrefix: string = '../../assets/'
+        pathPrefix: string = '../../static-files/'
     ): string => {
         const path = `${pathPrefix}${assetPath}`;
         return new URL(path, import.meta.url).href;
