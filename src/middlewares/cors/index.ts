@@ -14,8 +14,13 @@ export const setResponseHeaders = (
         next();
     } else {
         const referrer = removeLastChar(req.headers.referer, '/');
-        if (!referrer || !env.ALLOWED_ORIGINS.includes(referrer)) {
-            res.status(404).send();
+        if (
+            !referrer ||
+            !env.ALLOWED_ORIGINS.some(allowedOrigin =>
+                referrer.includes(allowedOrigin)
+            )
+        ) {
+            res.status(404).send('Request origin not set');
             return;
         }
         res.setHeader('Access-Control-Allow-Credentials', 'true');
