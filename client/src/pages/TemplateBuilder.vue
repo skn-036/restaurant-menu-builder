@@ -4,8 +4,9 @@ import {
     computed,
     ref,
     provide,
-    watchEffect,
+    // watchEffect,
     nextTick,
+    watch,
 } from 'vue';
 
 // components
@@ -18,6 +19,7 @@ import useHttpRequest from '@/composables/request/useHttpRequest';
 
 // 3rd party import
 import { v4 } from 'uuid';
+import { cloneDeep } from 'lodash';
 import { useToast } from 'vue-toastification';
 
 // types
@@ -115,15 +117,56 @@ const templateData = ref<Template>({
     product: '',
     productBuilder: productTemplate.value,
 });
-watchEffect(() => {
-    templateData.value = {
-        ...templateData.value,
-        restaurant: restauranTemplateString.value,
-        restaurantBuilder: restaurantTemplate.value,
-        product: productTemplateString.value,
-        productBuilder: productTemplate.value,
-    };
-});
+
+watch(
+    () => restauranTemplateString.value,
+    () => {
+        templateData.value = {
+            ...templateData.value,
+            restaurant: restauranTemplateString.value,
+        };
+        console.log(restauranTemplateString.value, 'rs');
+    }
+);
+watch(
+    () => cloneDeep(restaurantTemplate.value),
+    () => {
+        templateData.value = {
+            ...templateData.value,
+            restaurantBuilder: restaurantTemplate.value,
+        };
+        console.log(restaurantTemplate.value, 'r');
+    }
+);
+watch(
+    () => productTemplateString.value,
+    () => {
+        templateData.value = {
+            ...templateData.value,
+            product: productTemplateString.value,
+        };
+        console.log(productTemplateString.value, 'ps');
+    }
+);
+watch(
+    () => cloneDeep(productTemplate.value),
+    () => {
+        templateData.value = {
+            ...templateData.value,
+            productBuilder: productTemplate.value,
+        };
+        console.log(productTemplate.value, 'p');
+    }
+);
+// watchEffect(() => {
+//     templateData.value = {
+//         ...templateData.value,
+//         restaurant: restauranTemplateString.value,
+//         restaurantBuilder: restaurantTemplate.value,
+//         product: productTemplateString.value,
+//         productBuilder: productTemplate.value,
+//     };
+// });
 
 /**
  * ----------------------------------------------------------------------------------------
