@@ -81,7 +81,6 @@ const onUpdateTemplateInformation = (
 watch(
     () => cloneDeep(templateInformation.value),
     async () => {
-        console.log(templateInformation.value);
         const response = await generatePreview<string[]>({
             templateInformation: templateInformation.value,
         });
