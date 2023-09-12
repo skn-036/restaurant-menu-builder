@@ -29,11 +29,15 @@ const resolveTemplateContainer = (
     if (!templateString) templateString = container;
 
     // sizing is done by scale wr to A4 size. dynamic width height not needed in this case
-    const pageRootStyle = `width: 596px; height: 842px;`;
+    // const pageRootStyle = `width: 596px; height: 842px;`;
+    const pageRootStyle = ``;
+    const pageRootClass = ``;
 
     templateString = templateString
         .split('[{page_root_style}]')
-        .join(pageRootStyle);
+        .join(pageRootStyle)
+        .split('[{page_root_class}]')
+        .join(pageRootClass);
 
     return templateString;
 };

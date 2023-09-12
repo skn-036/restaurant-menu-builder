@@ -90,8 +90,11 @@ export const generatePdf = async (req: Request, filePath: string = '') => {
             templateInformation.pageSize.size === 'A4' ? 72 : 48;
 
         // 96dpi / 72dpi = 1.33, A5 / A4 = 0.705
+        // const scale =
+        //     templateInformation.pageSize.size === 'A4' ? 1.33 : 1.33 * 0.705;
+
         const scale =
-            templateInformation.pageSize.size === 'A4' ? 1.33 : 1.33 * 0.705;
+            templateInformation.pageSize.size === 'A4' ? 1 : 1 * 0.705;
 
         const options: PDFOptions = {
             format: templateInformation.pageSize.size,
