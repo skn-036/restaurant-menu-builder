@@ -4,7 +4,6 @@ import {
     computed,
     ref,
     provide,
-    // watchEffect,
     nextTick,
     watch,
 } from 'vue';
@@ -125,7 +124,6 @@ watch(
             ...templateData.value,
             restaurant: restauranTemplateString.value,
         };
-        console.log(restauranTemplateString.value, 'rs');
     }
 );
 watch(
@@ -135,7 +133,6 @@ watch(
             ...templateData.value,
             restaurantBuilder: restaurantTemplate.value,
         };
-        console.log(restaurantTemplate.value, 'r');
     }
 );
 watch(
@@ -145,7 +142,6 @@ watch(
             ...templateData.value,
             product: productTemplateString.value,
         };
-        console.log(productTemplateString.value, 'ps');
     }
 );
 watch(
@@ -155,18 +151,8 @@ watch(
             ...templateData.value,
             productBuilder: productTemplate.value,
         };
-        console.log(productTemplate.value, 'p');
     }
 );
-// watchEffect(() => {
-//     templateData.value = {
-//         ...templateData.value,
-//         restaurant: restauranTemplateString.value,
-//         restaurantBuilder: restaurantTemplate.value,
-//         product: productTemplateString.value,
-//         productBuilder: productTemplate.value,
-//     };
-// });
 
 /**
  * ----------------------------------------------------------------------------------------

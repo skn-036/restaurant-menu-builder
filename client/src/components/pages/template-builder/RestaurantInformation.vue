@@ -13,10 +13,12 @@ import {
 import ItemBuilder from '@/components/pages/template-builder/ItemBuilder.vue';
 import ItemStyle from '@/components/pages/template-builder/ItemStyle.vue';
 
+// assets
+import logoUrl from '@/assets/images/demo-logo.jpg';
+
 // composables
 import useCreateTemplate from '@/composables/template/useCreateTemplate';
 import useCommonUtils from '@/composables/utils/useCommonUtils';
-import useFile from '@/composables/files/useFile';
 
 // 3rd party
 import { cloneDeep } from 'lodash';
@@ -66,7 +68,6 @@ const BUILDER = 'restaurant';
 const { generateHtml, setTemplateString, wrapper, title, image } =
     useCreateTemplate(BUILDER);
 const { generateId } = useCommonUtils();
-const { resolvePathUrl } = useFile();
 
 /**
  * ----------------------------------------------------------------------------------------
@@ -131,7 +132,7 @@ const builderItems = computed<TemplateBuilderItem[]>(() => {
         class: `${image.value.class} restaurant-logo`,
         attrs: {
             ...image.value.attrs,
-            src: resolvePathUrl('images/demo-logo.jpg'),
+            src: logoUrl,
         },
         title: 'Restaurant logo',
     };
