@@ -57,7 +57,6 @@ const onFileUpload = async (event: Event) => {
             file.value,
             props.dimension
         );
-        console.log(base64.value);
         emit('update:model-value', props.toBase64 ? base64.value : file.value);
     }
 };

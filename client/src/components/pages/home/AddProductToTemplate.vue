@@ -61,7 +61,7 @@ watch(
     () => selectedProduct.value,
     () => {
         if (selectedProduct.value) {
-            product.value = { ...selectedProduct.value };
+            product.value = { ...selectedProduct.value, id: v4() };
         } else {
             product.value = { ...initialProduct.value, id: v4() };
         }
@@ -96,9 +96,9 @@ const onProductAdd = async () => {
     if (!editMode.value) {
         const newTemplateInformation = {
             ...templateInformation.value,
-            products: [product.value].concat(
-                templateInformation.value.products
-            ),
+            products: templateInformation.value.products.concat([
+                product.value,
+            ]),
         };
         onUpdateTemplateInformation(newTemplateInformation);
         product.value = { ...initialProduct.value, id: v4() };

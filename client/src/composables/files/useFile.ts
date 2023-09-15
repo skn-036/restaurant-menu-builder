@@ -1,3 +1,5 @@
+import { BlobOptions } from 'buffer';
+
 const useFile = () => {
     /**
      * --------------------------------------------------------------------------------
@@ -115,11 +117,25 @@ const useFile = () => {
         });
     };
 
+    const openFileStream = (
+        data: Buffer,
+        blobOptions: BlobOptions = {},
+        newTab: boolean = true
+    ) => {
+        const url = window.URL.createObjectURL(new Blob([data], blobOptions));
+        const link = document.createElement('a');
+        link.href = url;
+        if (newTab) link.setAttribute('target', '_blank');
+        link.click();
+        link.remove();
+    };
+
     return {
         resolvePathUrl,
         toBase64,
         getImageDimensions,
         resizeAndConvertToBase64,
+        openFileStream,
     };
 };
 

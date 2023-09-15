@@ -14,6 +14,14 @@ export type TemplateInformationProvider = {
     ) => void;
 };
 
+export type PreviewProvider = {
+    previewPages: Ref<string[][]>;
+    onUpdatePreviewPages: (previewPages: string[][]) => void;
+    PAGEWIDTH: number;
+    PAGEHEIGHT: number;
+    PAGEMARGIN: number;
+};
+
 export type TemplateProvider = {
     templates: Ref<Template[]>;
 };
