@@ -64,6 +64,15 @@ const useCommonUtils = () => {
         }, {});
     };
 
+    const arrayFromNumber = (
+        number: number,
+        startFromZero: boolean = false
+    ) => {
+        return Array.from(Array(number).keys(), x =>
+            startFromZero ? x : x + 1
+        );
+    };
+
     return {
         wordCapitalize,
         stringCapitalize,
@@ -74,6 +83,7 @@ const useCommonUtils = () => {
         generateId,
         filterPropsFromObject,
         omitPropsFromObject,
+        arrayFromNumber,
     };
 };
 

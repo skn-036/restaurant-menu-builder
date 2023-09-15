@@ -9,10 +9,10 @@ const menus: NavMenu[] = [
         title: 'Homepage',
         route: '/',
     },
-    {
-        title: 'Template builder',
-        route: '/template-builder',
-    },
+    // {
+    //     title: 'Template builder',
+    //     route: '/template-builder',
+    // },
 ];
 </script>
 

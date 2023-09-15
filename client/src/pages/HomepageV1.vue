@@ -1,32 +1,22 @@
 <script setup lang="ts">
-import {
-    ref,
-    computed,
-    provide,
-    watch,
-    onBeforeMount,
-    onMounted,
-    inject,
-    CSSProperties,
-} from 'vue';
+import { ref, provide, watch, onBeforeMount } from 'vue';
 
 // components
 import { Button } from '@/components/ui/buttons';
 import { Title } from '@/components/ui/components';
 import {
-    AddRestuarantInformation,
+    AddRestuarantInformationV1,
     FoodAndDrinks,
-    PreviewBuilder,
-    Pagination,
+    PaginationV1,
 } from '@/components/pages/home';
 
 // composables
 import useHttpRequest from '@/composables/request/useHttpRequest';
+import useEnv from '@/composables/env/useEnv';
 import useTemplate from '@/composables/template/useTemplate';
-import useFile from '@/composables/files/useFile';
 
 // 3rd party import
-// import { cloneDeep } from 'lodash';
+import { cloneDeep } from 'lodash';
 
 // data
 import defaultTemplates from '@/data/templates';
@@ -38,22 +28,18 @@ import {
     Template,
     PageSize,
 } from '@/types/home/home';
-import { AppConfig } from '@/types/layout/app';
 
 import {
     productProviderKey,
     templateInformationProviderKey,
     templateProviderKey,
-    previewProviderKey,
 } from '@/symbols/home/home';
-import { appConfigProviderKey } from '@/symbols/app';
 
 // composables extraction
 const { pageSizes } = useTemplate();
-const { openFileStream } = useFile();
-
-// injections
-const { windowWidth } = inject(appConfigProviderKey) as AppConfig;
+const { save: generatePreview, saving: previewLoading } =
+    useHttpRequest('/api/pdf/preview');
+const { env } = useEnv();
 
 /**
  * -----------------------------------------------------------------------------
@@ -92,59 +78,40 @@ const onUpdateTemplateInformation = (
     templateInformation.value = updatedTemplateInformation;
 };
 
+watch(
+    () => cloneDeep(templateInformation.value),
+    async () => {
+        const response = await generatePreview<string[]>({
+            templateInformation: templateInformation.value,
+        });
+        previewPages.value = response?.length ? response : [];
+
+        if (previewPages.value.length) {
+            if (!activePreview.value) {
+                activePreview.value = previewPages.value[0];
+            } else {
+                if (
+                    !previewPages.value.some(
+                        preview => preview === activePreview.value
+                    )
+                )
+                    activePreview.value = previewPages.value[0];
+            }
+            timestamp.value = Date.now();
+        } else {
+            activePreview.value = null;
+        }
+    }
+);
+
 /**
  * -----------------------------------------------------------------------------
  * template preview...
  * -----------------------------------------------------------------------------
  */
-
-const PAGEWIDTH = 793;
-const PAGEHEIGHT = 1120;
-const PAGEMARGIN = 72;
-const preview = ref<HTMLDivElement | null>(null);
-const previewWidth = ref(PAGEWIDTH);
-
-onMounted(() => {
-    if (preview.value) previewWidth.value = preview.value.clientWidth;
-});
-watch(
-    () => windowWidth.value,
-    () => {
-        if (preview.value) previewWidth.value = preview.value.clientWidth;
-    }
-);
-
-const previewScale = computed(() => previewWidth.value / PAGEWIDTH);
-const previewStyle = computed<CSSProperties>(() => {
-    return {
-        width: `${PAGEWIDTH}px`,
-        height: `${PAGEHEIGHT}px`,
-        padding: `${PAGEMARGIN}px`,
-        scale: previewScale.value,
-        transformOrigin: 'left top',
-        backgroundImage: `url('${templateInformation.value.template.background}')`,
-    };
-});
-const paginationStyle = computed<CSSProperties>(() => {
-    const transformedHeight = PAGEHEIGHT - PAGEHEIGHT * previewScale.value;
-    return {
-        transform: `translateY(${-transformedHeight}px)`,
-    };
-});
-
-const previewPages = ref<string[][]>([[]]);
-const onUpdatePreviewPages = (newPreviewPages: string[][]) => {
-    previewPages.value = newPreviewPages;
-};
-
-/**
- * -----------------------------------------------------------------------------
- * Pagination...
- * -----------------------------------------------------------------------------
- */
-const page = ref(0);
-const paginationPageLength = computed(() => previewPages.value.length);
-const activePreview = computed(() => previewPages.value[page.value].join(''));
+const previewPages = ref<string[]>([]);
+const activePreview = ref<string | null>(null);
+const timestamp = ref(Date.now());
 
 /**
  * -----------------------------------------------------------------------------
@@ -175,30 +142,23 @@ const onUpdateProduct = (product: Product) => {
  * -----------------------------------------------------------------------------
  */
 const openPrintDialog = async () => {
-    const response = await generatePdf<Buffer>(
-        {
-            templateInformation: templateInformation.value,
-        },
-        {
-            axiosConfig: {
-                responseType: 'blob',
-            },
-        }
+    const printWindow = window.open(
+        `${env.SERVER_URL}/static/pdf/output.pdf`,
+        '_blank'
     );
-    if (response) {
-        const url = window.URL.createObjectURL(
-            new Blob([response], { type: 'application/pdf' })
-        );
-        const printWindow = window.open(url, '_blank');
 
-        if (printWindow === null) {
-            return;
-        }
-
-        printWindow.onload = () => {
-            printWindow.print();
-        };
+    // Check if the new window has been blocked
+    if (printWindow === null) {
+        return;
     }
+
+    printWindow.onload = async () => {
+        await new Promise(resolve => {
+            printWindow.addEventListener('load', resolve);
+        });
+
+        printWindow.print();
+    };
 };
 
 /**
@@ -206,24 +166,16 @@ const openPrintDialog = async () => {
  * pdf generation...
  * -----------------------------------------------------------------------------
  */
-const { save: generatePdf, saving: generatingPreview } =
-    useHttpRequest('api/pdf/generate');
+// const { save: generatePdf } = useHttpRequest('api/pdf/generate');
 
-const onPdfGenerate = async () => {
-    const response = await generatePdf<Buffer>(
-        {
-            templateInformation: templateInformation.value,
-        },
-        {
-            axiosConfig: {
-                responseType: 'blob',
-            },
-        }
-    );
-    if (response) {
-        openFileStream(response, { type: 'application/pdf' });
-    }
-};
+// const onPdfGenerate = async () => {
+//     const templateString = resolveTemplateString(templateInformation.value);
+//     const response = await generatePdf({
+//         body: templateString,
+//         templateInformation: templateInformation.value,
+//     });
+//     return response;
+// };
 
 /**
  * -----------------------------------------------------------------------------
@@ -236,23 +188,16 @@ provide(templateInformationProviderKey, {
     onUpdateTemplateInformation,
 });
 provide(templateProviderKey, { templates });
-provide(previewProviderKey, {
-    previewPages,
-    onUpdatePreviewPages,
-    PAGEWIDTH,
-    PAGEHEIGHT,
-    PAGEMARGIN,
-});
 </script>
 
 <template>
     <div class="w-full">
         <!-- loading -->
         <section
-            v-if="generatingPreview"
+            v-if="previewLoading"
             class="fixed top-24 left-1/2 z-20 px-4 py-2 bg-gradient text-white text-sm font-semibold rounded-md"
         >
-            Erstellen...
+            Vorschau wird geladen...
         </section>
 
         <!-- top section -->
@@ -267,28 +212,34 @@ provide(previewProviderKey, {
                 </div>
 
                 <div class="flex-start gap-4">
-                    <Button label="Exportieren" @click="onPdfGenerate">
-                        <template #icon>
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="15"
-                                height="18"
-                                viewBox="0 0 15 18"
-                                fill="none"
-                            >
-                                <path
-                                    fill-rule="evenodd"
-                                    clip-rule="evenodd"
-                                    d="M2.24109 0.25H5.05359C6.77948 0.25 8.17859 1.64911 8.17859 3.375V4.9375C8.17859 5.80044 8.87814 6.5 9.74109 6.5H11.3036C13.0295 6.5 14.4286 7.89911 14.4286 9.625V16.1875C14.4286 17.0504 13.729 17.75 12.8661 17.75H2.24109C1.37814 17.75 0.678589 17.0504 0.678589 16.1875V1.8125C0.678589 0.949555 1.37814 0.25 2.24109 0.25ZM7.99553 8.55806C7.87832 8.44085 7.71935 8.375 7.55359 8.375C7.38783 8.375 7.22886 8.44085 7.11165 8.55806L4.61165 11.0581C4.36757 11.3021 4.36757 11.6979 4.61165 11.9419C4.85572 12.186 5.25145 12.186 5.49553 11.9419L6.92859 10.5089L6.92859 14C6.92859 14.3452 7.20841 14.625 7.55359 14.625C7.89877 14.625 8.17859 14.3452 8.17859 14L8.17859 10.5089L9.61165 11.9419C9.85572 12.186 10.2515 12.186 10.4955 11.9419C10.7396 11.6979 10.7396 11.3021 10.4955 11.0581L7.99553 8.55806Z"
-                                    fill="#F4F4F4"
-                                />
-                                <path
-                                    d="M9.42859 3.375C9.42859 2.28079 9.02689 1.2804 8.36292 0.513254C11.1954 1.25315 13.4254 3.48323 14.1653 6.31567C13.3982 5.6517 12.3978 5.25 11.3036 5.25H9.74109C9.5685 5.25 9.42859 5.11009 9.42859 4.9375V3.375Z"
-                                    fill="#F4F4F4"
-                                />
-                            </svg>
-                        </template>
-                    </Button>
+                    <a
+                        :href="`${env.SERVER_URL}/static/pdf/output.pdf`"
+                        target="_blank"
+                        download="output.pdf"
+                    >
+                        <Button label="Exportieren">
+                            <template #icon>
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="15"
+                                    height="18"
+                                    viewBox="0 0 15 18"
+                                    fill="none"
+                                >
+                                    <path
+                                        fill-rule="evenodd"
+                                        clip-rule="evenodd"
+                                        d="M2.24109 0.25H5.05359C6.77948 0.25 8.17859 1.64911 8.17859 3.375V4.9375C8.17859 5.80044 8.87814 6.5 9.74109 6.5H11.3036C13.0295 6.5 14.4286 7.89911 14.4286 9.625V16.1875C14.4286 17.0504 13.729 17.75 12.8661 17.75H2.24109C1.37814 17.75 0.678589 17.0504 0.678589 16.1875V1.8125C0.678589 0.949555 1.37814 0.25 2.24109 0.25ZM7.99553 8.55806C7.87832 8.44085 7.71935 8.375 7.55359 8.375C7.38783 8.375 7.22886 8.44085 7.11165 8.55806L4.61165 11.0581C4.36757 11.3021 4.36757 11.6979 4.61165 11.9419C4.85572 12.186 5.25145 12.186 5.49553 11.9419L6.92859 10.5089L6.92859 14C6.92859 14.3452 7.20841 14.625 7.55359 14.625C7.89877 14.625 8.17859 14.3452 8.17859 14L8.17859 10.5089L9.61165 11.9419C9.85572 12.186 10.2515 12.186 10.4955 11.9419C10.7396 11.6979 10.7396 11.3021 10.4955 11.0581L7.99553 8.55806Z"
+                                        fill="#F4F4F4"
+                                    />
+                                    <path
+                                        d="M9.42859 3.375C9.42859 2.28079 9.02689 1.2804 8.36292 0.513254C11.1954 1.25315 13.4254 3.48323 14.1653 6.31567C13.3982 5.6517 12.3978 5.25 11.3036 5.25H9.74109C9.5685 5.25 9.42859 5.11009 9.42859 4.9375V3.375Z"
+                                        fill="#F4F4F4"
+                                    />
+                                </svg>
+                            </template>
+                        </Button>
+                    </a>
 
                     <Button label="Drucken" @click="openPrintDialog">
                         <template #icon>
@@ -313,31 +264,53 @@ provide(previewProviderKey, {
         </section>
 
         <!-- main content -->
-        <section class="grid grid-cols-2 gap-4 mt-8">
-            <div ref="preview" class="col-span-2 lg:col-span-1 h-max">
+        <section class="flex flex-col lg:flex-row gap-4 mt-8">
+            <div
+                id="pdf"
+                :style="{
+                    width: `${templateInformation.pageSize.width * 1.12}px`,
+                }"
+            >
                 <div
-                    :style="previewStyle"
-                    class="rounded-md font-league-spartan"
-                    v-html="activePreview"
-                ></div>
+                    class=""
+                    :style="{
+                        width: `${templateInformation.pageSize.width * 1.12}px`,
+                        height: `${
+                            templateInformation.pageSize.height * 1.12
+                        }px`,
+                    }"
+                >
+                    <img
+                        v-if="!activePreview"
+                        :src="
+                            templateInformation.template
+                                ? templateInformation.template.background
+                                : ''
+                        "
+                        class="w-full h-full rounded-md"
+                    />
 
-                <div class="w-full mt-4" :style="paginationStyle">
-                    <Pagination v-model="page" :total="paginationPageLength" />
-                    <!-- <Pagination
+                    <img
+                        v-else
+                        class="w-full h-full rounded-md"
+                        :src="`${env.SERVER_URL}/static${activePreview}?v=${timestamp}`"
+                    />
+                </div>
+
+                <div class="w-full mt-4">
+                    <PaginationV1
                         :preview-pages="previewPages"
                         :active-preview="activePreview"
                         @update-page="activePreview = $event"
-                    /> -->
+                    />
                 </div>
             </div>
 
-            <div class="col-span-2 lg:col-span-1 flex-1 flex flex-col gap-4">
-                <AddRestuarantInformation />
+            <div class="flex-1 flex flex-col gap-4">
+                <AddRestuarantInformationV1 />
 
                 <FoodAndDrinks />
             </div>
         </section>
-
-        <PreviewBuilder />
     </div>
 </template>

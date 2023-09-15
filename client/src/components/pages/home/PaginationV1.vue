@@ -1,43 +1,65 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 
-import useCommonUtils from '@/composables/utils/useCommonUtils';
-
 type Props = {
-    modelValue: number;
-    total: number;
+    previewPages: string[];
+    activePreview: string | null;
 };
 
 type Emit = {
-    (e: 'update:model-value', page: number): void;
+    (e: 'update-page', activePage: string): void;
 };
 
-const props = defineProps<Props>();
+const props = withDefaults(defineProps<Props>(), {
+    activePreview: null,
+});
 
 const emit = defineEmits<Emit>();
 
-const { arrayFromNumber } = useCommonUtils();
-
-const page = computed({
-    get: () => props.modelValue,
-    set: val => emit('update:model-value', val),
+const pages = computed(() => {
+    return props.previewPages.map((page, index) => ({
+        path: page,
+        index,
+        page: index + 1,
+    }));
 });
 
-const onPageChange = (newPage: 'prev' | 'next' | number) => {
-    if (newPage === 'prev') {
-        if (page.value <= 0) return;
-        page.value = page.value - 1;
-    } else if (newPage === 'next') {
-        if (page.value >= props.total - 1) return;
-        page.value = page.value + 1;
+const activePage = computed(() => {
+    const page = pages.value.find(page => page.path === props.activePreview);
+    return page ? page : null;
+});
+
+const onPageChange = (page: 'prev' | 'next' | number) => {
+    if (page === 'prev') {
+        if (!activePage.value) {
+            emit('update-page', pages.value[0].path);
+            return;
+        }
+        if (activePage.value && activePage.value?.index <= 0) return;
+        emit('update-page', pages.value[activePage.value.index - 1].path);
+    } else if (page === 'next') {
+        if (!activePage.value) {
+            emit('update-page', pages.value[pages.value.length - 1].path);
+            return;
+        }
+        if (
+            activePage.value &&
+            activePage.value?.index >= pages.value.length - 1
+        )
+            return;
+        emit('update-page', pages.value[activePage.value.index + 1].path);
     } else {
-        page.value = newPage;
+        if (activePage.value?.index === page) return;
+        emit('update-page', pages.value[page].path);
     }
 };
 </script>
 
 <template>
-    <div class="w-full bg-white h-[68px] px-4 py-4 flex-center rounded-xl">
+    <div
+        v-if="pages.length"
+        class="w-full bg-white h-[68px] px-4 py-4 flex-center rounded-xl"
+    >
         <div class="w-full border-t h-[36px] border-[#d9d9d9]">
             <div class="h-full grid grid-cols-12 gap-x-4">
                 <!-- previous -->
@@ -46,7 +68,7 @@ const onPageChange = (newPage: 'prev' | 'next' | number) => {
                     @click="onPageChange('prev')"
                 >
                     <svg
-                        v-if="page > 0"
+                        v-if="activePage && activePage.index > 0"
                         xmlns="http://www.w3.org/2000/svg"
                         width="16"
                         height="8"
@@ -62,7 +84,7 @@ const onPageChange = (newPage: 'prev' | 'next' | number) => {
                     </svg>
 
                     <div
-                        v-if="page > 0"
+                        v-if="activePage && activePage.index > 0"
                         class="text-sm font-medium text-[#7A7878] leading-3"
                     >
                         Vorherige
@@ -74,16 +96,16 @@ const onPageChange = (newPage: 'prev' | 'next' | number) => {
                     class="col-span-8 flex flex-row justify-center h-full items-end"
                 >
                     <div
-                        v-for="link in arrayFromNumber(total, true)"
+                        v-for="page in pages"
                         class="px-4 flex items-end h-[36px] cursor-pointer text-sm leading-4 font-medium"
                         :class="[
-                            link === page
+                            activePage && activePage.page === page.page
                                 ? 'text-theme border-t-2 border-theme'
                                 : 'text-[#7A7878]',
                         ]"
-                        @click="onPageChange(link)"
+                        @click="onPageChange(page.index)"
                     >
-                        {{ link + 1 }}
+                        {{ page.page }}
                     </div>
                 </div>
 
@@ -93,14 +115,14 @@ const onPageChange = (newPage: 'prev' | 'next' | number) => {
                     @click="onPageChange('next')"
                 >
                     <div
-                        v-if="page < total - 1"
+                        v-if="activePage && activePage.index < pages.length - 1"
                         class="text-sm font-medium text-[#7A7878] leading-3"
                     >
                         Nächste
                     </div>
 
                     <svg
-                        v-if="page < total - 1"
+                        v-if="activePage && activePage.index < pages.length - 1"
                         xmlns="http://www.w3.org/2000/svg"
                         width="16"
                         height="8"

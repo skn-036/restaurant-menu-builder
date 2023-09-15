@@ -11,17 +11,21 @@ import { resolveTemplateString } from '@/composables/resolve-template';
 import { TemplateInformation } from '@/types/pdf';
 
 export const onPdfGeneration = async (req: Request, res: Response) => {
-    // try {
-    //     const filePath = path.join(__dirname, '../public/pdf/output.pdf');
-    //     const pdf = await generatePdf(req, filePath);
-    //     res.set({
-    //         'Content-Type': 'application/pdf',
-    //         'Content-Disposition': 'attachment; filename="document.pdf"',
-    //         'Content-Length': pdf.length,
-    //     }).send(pdf);
-    // } catch (error) {
-    //     res.send(error);
-    // }
+    try {
+        const pdf = await generatePdf(req);
+
+        if (!pdf) {
+            res.sendStatus(500);
+            return;
+        }
+        res.set({
+            'Content-Type': 'application/pdf',
+            'Content-Disposition': 'attachment; filename="document.pdf"',
+            'Content-Length': pdf.length,
+        }).send(pdf);
+    } catch (error) {
+        res.send(error);
+    }
 };
 
 export const onPdfPreview = async (req: Request, res: Response) => {
@@ -80,19 +84,18 @@ export const generatePdf = async (req: Request, filePath: string = '') => {
             `,
         });
 
-        const pdfFilePath = filePath
-            ? filePath
-            : path.resolve(__dirname, '../public/pdf/output.pdf');
+        const pdfFilePath = filePath ? filePath : undefined;
 
-        createDirectory(pdfFilePath);
+        if (pdfFilePath) createDirectory(pdfFilePath);
 
-        const marginValue =
-            templateInformation.pageSize.size === 'A4' ? 72 : 48;
+        // const marginValue =
+        //     templateInformation.pageSize.size === 'A4' ? 72 : 48;
 
         // 96dpi / 72dpi = 1.33, A5 / A4 = 0.705
         // const scale =
         //     templateInformation.pageSize.size === 'A4' ? 1.33 : 1.33 * 0.705;
 
+        const marginValue = 72;
         const scale =
             templateInformation.pageSize.size === 'A4' ? 1 : 1 * 0.705;
 
