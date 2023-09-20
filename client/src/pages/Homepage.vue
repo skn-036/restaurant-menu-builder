@@ -151,7 +151,7 @@ const activePreview = computed(() => previewPages.value[page.value].join(''));
  * products...
  * -----------------------------------------------------------------------------
  */
-const { getList: getProducts } = useHttpRequest('/api/products');
+const { getList: getProducts } = useHttpRequest('/api/dishes');
 const products = ref<Product[]>([]);
 const onProductGet = async () => {
     products.value = await getProducts<Product[]>();
@@ -174,8 +174,10 @@ const onUpdateProduct = (product: Product) => {
  * print dialog ...
  * -----------------------------------------------------------------------------
  */
+const { save: generatePrint, saving: generatingPrint } =
+    useHttpRequest('/api/print');
 const openPrintDialog = async () => {
-    const response = await generatePdf<Buffer>(
+    const response = await generatePrint<Buffer>(
         {
             templateInformation: templateInformation.value,
         },
@@ -207,7 +209,7 @@ const openPrintDialog = async () => {
  * -----------------------------------------------------------------------------
  */
 const { save: generatePdf, saving: generatingPreview } =
-    useHttpRequest('api/pdf/generate');
+    useHttpRequest('/api/menucard');
 
 const onPdfGenerate = async () => {
     const response = await generatePdf<Buffer>(
@@ -249,7 +251,7 @@ provide(previewProviderKey, {
     <div class="w-full">
         <!-- loading -->
         <section
-            v-if="generatingPreview"
+            v-if="generatingPreview || generatingPrint"
             class="fixed top-24 left-1/2 z-20 px-4 py-2 bg-gradient text-white text-sm font-semibold rounded-md"
         >
             Erstellen...
