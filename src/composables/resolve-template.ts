@@ -118,19 +118,19 @@ const resolveProducts = (
 };
 
 // resolve pixel values to specific page size
-const resolveSizes = (
-    templateInformation: TemplateInformation,
-    templateString: string = ''
-) => {
-    const { template, pageSize } = templateInformation;
-    const { mapper } = template;
-    const { size } = pageSize;
+// const resolveSizes = (
+//     templateInformation: TemplateInformation,
+//     templateString: string = ''
+// ) => {
+//     const { template, pageSize } = templateInformation;
+//     const { mapper } = template;
+//     const { size } = pageSize;
 
-    if (!mapper) return templateString;
+//     if (!mapper) return templateString;
 
-    mapper.forEach(map => {
-        templateString = templateString.split(map.key).join(map[size]);
-    });
+//     mapper.forEach(map => {
+//         templateString = templateString.split(map.key).join(map[size]);
+//     });
 
-    return templateString;
-};
+//     return templateString;
+// };
