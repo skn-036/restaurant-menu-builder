@@ -10,11 +10,11 @@ import { useToast } from 'vue-toastification';
 
 type Props = {
     modelValue: File | string | null;
-    toBase64: boolean;
+    toBase64?: boolean;
     label?: string;
-    uploadButtonText: string;
+    uploadButtonText?: string;
     dimension?: { width: number; height: number };
-    preview: boolean;
+    preview?: boolean;
 };
 
 type Emit = {

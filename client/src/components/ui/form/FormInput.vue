@@ -8,10 +8,10 @@ type Props = {
     labelClass?: string;
     error?: string | null;
     errorClass?: string;
-    required: boolean;
-    type: string;
+    required?: boolean;
+    type?: string;
     step?: string | number;
-    mode: 'input' | 'blur';
+    mode?: 'input' | 'blur';
 };
 
 type Emit = {

@@ -37,7 +37,10 @@ const onPageChange = (newPage: 'prev' | 'next' | number) => {
 </script>
 
 <template>
-    <div class="w-full bg-white h-[68px] px-4 py-4 flex-center rounded-xl">
+    <div
+        id="preview-pagination"
+        class="w-full bg-white h-[68px] px-4 py-4 flex-center rounded-xl"
+    >
         <div class="w-full border-t h-[36px] border-[#d9d9d9]">
             <div class="h-full grid grid-cols-12 gap-x-4">
                 <!-- previous -->

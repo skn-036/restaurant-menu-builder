@@ -8,7 +8,7 @@ import { useToast } from 'vue-toastification';
 
 type Props = {
     modelValue: File | string | null;
-    toBase64: boolean;
+    toBase64?: boolean;
 };
 
 type Emit = {
