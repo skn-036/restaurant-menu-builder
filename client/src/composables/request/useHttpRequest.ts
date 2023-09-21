@@ -1,3 +1,4 @@
+/* c8 ignore next 373 */
 import { ref } from 'vue';
 import axios from 'axios';
 import { CancelTokenSource, AxiosError, AxiosRequestConfig } from 'axios';

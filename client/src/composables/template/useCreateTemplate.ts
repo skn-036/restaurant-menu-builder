@@ -1,3 +1,4 @@
+/* c8 ignore next 373 */
 import { h, ref, computed, VNode, RendererNode, RendererElement } from 'vue';
 
 // composables

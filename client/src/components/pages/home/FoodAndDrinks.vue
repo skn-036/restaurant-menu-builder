@@ -9,7 +9,7 @@ const updatingProduct = ref<Product | null>(null);
 </script>
 
 <template>
-    <div class="w-full p-8 rounded-xl bg-white">
+    <div id="food-and-drinks" class="w-full p-8 rounded-xl bg-white">
         <div class="w-full flex flex-col gap-8">
             <Title>Speisen und Getränke</Title>
 

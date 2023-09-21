@@ -1,41 +1,48 @@
 {
-  "name": "client",
-  "private": true,
-  "version": "0.0.0",
-  "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "build": "vue-tsc && vite build",
-    "preview": "vite preview"
-  },
-  "dependencies": {
-    "@ckpack/vue-color": "^1.5.0",
-    "axios": "^1.4.0",
-    "lodash": "^4.17.21",
-    "sortablejs": "^1.15.0",
-    "tiny-emitter": "^2.1.0",
-    "uuid": "^9.0.0",
-    "vue": "^3.3.4",
-    "vue-feather": "^2.0.0",
-    "vue-router": "^4.2.4",
-    "vue-select": "^4.0.0-beta.6",
-    "vue-toastification": "^2.0.0-rc.5",
-    "vue3-popper": "^1.5.0",
-    "vue3-smooth-dnd": "^0.0.5",
-    "yup": "^1.2.0"
-  },
-  "devDependencies": {
-    "@types/lodash": "^4.14.197",
-    "@types/sortablejs": "^1.15.1",
-    "@types/uuid": "^9.0.2",
-    "@types/vue-select": "^3.16.2",
-    "@vitejs/plugin-vue": "^4.2.3",
-    "autoprefixer": "^10.4.14",
-    "dotenv": "^16.3.1",
-    "postcss": "^8.4.27",
-    "tailwindcss": "^3.3.3",
-    "typescript": "^5.0.2",
-    "vite": "^4.4.5",
-    "vue-tsc": "^1.8.5"
-  }
+    "name": "client",
+    "private": true,
+    "version": "0.0.0",
+    "type": "module",
+    "scripts": {
+        "dev": "vite",
+        "build": "vue-tsc && vite build",
+        "preview": "vite preview",
+        "test": "vitest",
+        "coverage": "vitest --dom --coverage"
+    },
+    "dependencies": {
+        "@ckpack/vue-color": "^1.5.0",
+        "axios": "^1.4.0",
+        "lodash": "^4.17.21",
+        "sortablejs": "^1.15.0",
+        "tiny-emitter": "^2.1.0",
+        "uuid": "^9.0.0",
+        "vue": "^3.3.4",
+        "vue-feather": "^2.0.0",
+        "vue-router": "^4.2.4",
+        "vue-select": "^4.0.0-beta.6",
+        "vue-toastification": "^2.0.0-rc.5",
+        "vue3-popper": "^1.5.0",
+        "vue3-smooth-dnd": "^0.0.5",
+        "yup": "^1.2.0"
+    },
+    "devDependencies": {
+        "@types/lodash": "^4.14.197",
+        "@types/sortablejs": "^1.15.1",
+        "@types/uuid": "^9.0.2",
+        "@types/vue-select": "^3.16.2",
+        "@vitejs/plugin-vue": "^4.2.3",
+        "@vitest/coverage-v8": "^0.34.4",
+        "@vitest/ui": "^0.34.4",
+        "@vue/test-utils": "^2.4.1",
+        "autoprefixer": "^10.4.14",
+        "dotenv": "^16.3.1",
+        "happy-dom": "^12.1.2",
+        "postcss": "^8.4.27",
+        "tailwindcss": "^3.3.3",
+        "typescript": "^5.0.2",
+        "vite": "^4.4.5",
+        "vitest": "^0.34.4",
+        "vue-tsc": "^1.8.5"
+    }
 }

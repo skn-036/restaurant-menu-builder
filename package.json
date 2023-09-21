@@ -9,7 +9,8 @@
         "dev": "concurrently \"npm run server\" \"npm run client\"",
         "build-client": "npm run build --prefix client",
         "build": "tsc && tsc-alias",
-        "test": "jest --watchAll --coverage"
+        "test": "jest",
+        "coverage": "jest --watchAll --coverage"
     },
     "keywords": [],
     "author": "",

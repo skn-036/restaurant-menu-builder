@@ -2,7 +2,7 @@
 type Props = {
     label?: string;
     icon?: string;
-    disabled: boolean;
+    disabled?: boolean;
     onDisabledButtonClick?: () => void;
 };
 

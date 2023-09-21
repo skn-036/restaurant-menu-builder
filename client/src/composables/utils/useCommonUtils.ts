@@ -15,7 +15,7 @@ const useCommonUtils = () => {
         return Math.floor(Math.random() * max + 1);
     };
 
-    const isJsonParsable = (string: string): boolean => {
+    const isJsonParsable = (string: any): boolean => {
         try {
             const parsed = JSON.parse(string);
             return Boolean(parsed);
@@ -68,8 +68,9 @@ const useCommonUtils = () => {
         number: number,
         startFromZero: boolean = false
     ) => {
-        return Array.from(Array(number).keys(), x =>
-            startFromZero ? x : x + 1
+        return Array.from(
+            Array(startFromZero ? number + 1 : number).keys(),
+            x => (startFromZero ? x : x + 1)
         );
     };
 

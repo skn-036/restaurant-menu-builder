@@ -1,3 +1,4 @@
+/* c8 ignore next 143 */
 import { BlobOptions } from 'buffer';
 
 const useFile = () => {
@@ -118,7 +119,7 @@ const useFile = () => {
     };
 
     const openFileStream = (
-        data: Buffer,
+        data: Buffer | Uint8Array,
         blobOptions: BlobOptions = {},
         newTab: boolean = true
     ) => {

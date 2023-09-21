@@ -10,5 +10,6 @@ module.exports = {
     verbose: true,
     forceExit: true,
     clearMocks: true,
-    collectCoverage: true,
+    // collectCoverage: true,
+    testPathIgnorePatterns: ['/node_modules/', '/dist/', '/client/'],
 };

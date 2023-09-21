@@ -8,8 +8,8 @@ type Props = {
     labelClass?: string;
     error?: string | null;
     errorClass?: string;
-    required: boolean;
-    rows: number;
+    required?: boolean;
+    rows?: number;
 };
 
 type Emit = {

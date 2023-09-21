@@ -1,4 +1,5 @@
 import { defineConfig } from 'vite';
+import { configDefaults } from 'vitest/config';
 import vue from '@vitejs/plugin-vue';
 import path from 'path';
 import dotenv from 'dotenv';
@@ -33,6 +34,12 @@ export default defineConfig(() => {
         },
         define: {
             'process.env': clientEnv,
+        },
+        test: {
+            globals: true,
+            clearMocks: true,
+            environment: 'happy-dom',
+            testTimeout: 20000,
         },
     };
 });
