@@ -62,6 +62,7 @@ defineProps<Props>();
             <div
                 :style="{
                     fontSize: '20px',
+                    lineHeight: '28px',
                     color: '#ffffff',
                     textAlign: 'right',
                     overflowWrap: 'break-word',
