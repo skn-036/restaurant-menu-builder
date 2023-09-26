@@ -8,10 +8,12 @@ lerna-debug.log*
 
 node_modules
 dist
+coverage
 *.local
 
 client/node_modules
 client/dist
+client/coverage
 src/public
 .env
 
