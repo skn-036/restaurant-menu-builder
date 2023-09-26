@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, watchEffect } from 'vue';
 
-import { FormLabel } from '@/components/ui/form';
+import FormLabel from '@/components/ui/form/FormLabel.vue';
 
 import useFile from '@/composables/files/useFile';
 
@@ -57,6 +57,7 @@ const onFileUpload = async (event: Event) => {
             file.value,
             props.dimension
         );
+
         emit('update:model-value', props.toBase64 ? base64.value : file.value);
     }
 };

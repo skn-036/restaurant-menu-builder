@@ -19,13 +19,9 @@ export type Template = {
     id: string;
     name: string;
     background?: string;
-    container: string;
-    restaurant: string;
-    product: string;
-    restaurantBuilder: TemplateBuilderItem;
-    productBuilder: TemplateBuilderItem;
-    mapper?: { key: string; A4: string; A5: string }[];
-    demo_content?: string | null;
+    container?: string;
+    restaurant?: string;
+    product?: string;
 };
 
 export type RestaurantInformation = {

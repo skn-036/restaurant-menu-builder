@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 
-import { FormTitleError } from '@/components/ui/form';
+import FormTitleError from '@/components/ui/form/FormTitleError.vue';
 
 // @ts-ignore
 import VSelect from 'vue-select';
@@ -28,8 +28,8 @@ type Emit = {
     (e: 'update:model-value', data: ModelValue): void;
     (e: 'open'): void;
     (e: 'close'): void;
-    (e: 'option-selecting', option: Option): void;
-    (e: 'option-selected', option: Option): void;
+    (e: 'option:selecting', option: Option): void;
+    (e: 'option:selected', option: Option): void;
     (e: 'option:deselecting', option: Option): void;
     (e: 'option:deselected', option: Option): void;
     (e: 'option:created', option: Option): void;
