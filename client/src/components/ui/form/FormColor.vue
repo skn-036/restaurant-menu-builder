@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import { FormTitleError } from '@/components/ui/form';
+import FormTitleError from '@/components/ui/form/FormTitleError.vue';
 import Popper from 'vue3-popper';
 import {
     Photoshop,

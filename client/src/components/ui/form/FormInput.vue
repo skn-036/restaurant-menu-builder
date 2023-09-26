@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import { FormTitleError } from '@/components/ui/form';
+import FormTitleError from '@/components/ui/form/FormTitleError.vue';
 
 type Props = {
     modelValue: string | number | null;

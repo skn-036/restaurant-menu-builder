@@ -72,7 +72,7 @@ describe('Composabe UseCommonUtils test', () => {
     });
 
     it('function arrayFromNumber() should generate array from given number using n + 1', () => {
-        expect(arrayFromNumber(4, true)).toEqual([0, 1, 2, 3, 4]);
+        expect(arrayFromNumber(4, true)).toEqual([0, 1, 2, 3]);
         expect(arrayFromNumber(4, false)).toEqual([1, 2, 3, 4]);
     });
 });

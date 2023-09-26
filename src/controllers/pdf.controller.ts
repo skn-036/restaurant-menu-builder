@@ -58,11 +58,12 @@ export const onPdfPreview = async (req: Request, res: Response) => {
 
 export const generatePdf = async (req: Request, filePath: string = '') => {
     try {
-        const { templateInformation } = req.body as {
+        const { templateInformation, templateString } = req.body as {
             templateInformation: TemplateInformation;
+            templateString: string;
         };
 
-        const body = resolveTemplateString(templateInformation);
+        const body = templateString;
 
         const browser = await launchPuppeteer();
         const page = await browser.newPage();
@@ -87,13 +88,6 @@ export const generatePdf = async (req: Request, filePath: string = '') => {
         const pdfFilePath = filePath ? filePath : undefined;
 
         if (pdfFilePath) createDirectory(pdfFilePath);
-
-        // const marginValue =
-        //     templateInformation.pageSize.size === 'A4' ? 72 : 48;
-
-        // 96dpi / 72dpi = 1.33, A5 / A4 = 0.705
-        // const scale =
-        //     templateInformation.pageSize.size === 'A4' ? 1.33 : 1.33 * 0.705;
 
         const marginValue = 72;
         const scale =

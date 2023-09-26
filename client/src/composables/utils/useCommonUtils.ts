@@ -68,9 +68,8 @@ const useCommonUtils = () => {
         number: number,
         startFromZero: boolean = false
     ) => {
-        return Array.from(
-            Array(startFromZero ? number + 1 : number).keys(),
-            x => (startFromZero ? x : x + 1)
+        return Array.from(Array(number).keys(), x =>
+            startFromZero ? x : x + 1
         );
     };
 
